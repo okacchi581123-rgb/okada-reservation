@@ -9,66 +9,99 @@
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;background:#edf1f5;color:#071f3d}
     main{min-height:100vh;display:grid;place-items:center;padding:24px}
-    .panel{width:min(360px,92vw);background:#fff;border:1px solid #d4e2ec;border-radius:18px;padding:28px 22px;text-align:center;box-shadow:0 12px 32px rgba(7,31,61,.12)}
+    .panel{width:min(380px,92vw);background:#fff;border:1px solid #d4e2ec;border-radius:18px;padding:28px 22px;text-align:center;box-shadow:0 12px 32px rgba(7,31,61,.12)}
     .spinner{width:48px;height:48px;margin:0 auto 18px;border:5px solid #d4e2ec;border-top-color:#071f3d;border-right-color:#ffd400;border-radius:50%;animation:spin .8s linear infinite}
+    .ok{font-size:44px;margin-bottom:12px}
     h1{margin:0 0 8px;font-size:20px}
-    p{margin:0;color:#637487;line-height:1.6;font-size:14px}
-    .error{margin-top:14px;color:#b42318;font-weight:700}
+    p{margin:7px 0;color:#637487;line-height:1.6;font-size:14px}
+    .success{color:#0a7a3c;font-weight:800}
+    .error{color:#b42318;font-weight:800}
+    .debug{margin-top:14px;padding:12px;border-radius:10px;background:#f5f7fa;text-align:left;font-size:12px;line-height:1.55;word-break:break-all}
     @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
 <main>
   <section class="panel">
-    <div class="spinner" aria-hidden="true"></div>
-    <h1>予約画面を開いています</h1>
-    <p id="status">LINE登録情報を確認しています。</p>
+    <div id="spinner" class="spinner" aria-hidden="true"></div>
+    <div id="ok" class="ok" style="display:none">✓</div>
+    <h1 id="title">LINE認証を確認しています</h1>
+    <p id="status">そのままお待ちください。</p>
     <p id="error" class="error"></p>
+    <div id="debug" class="debug"></div>
   </section>
 </main>
 
-<form id="bridgeForm" method="post"
-  action="https://script.google.com/macros/s/AKfycbxMBNdSLimZNbXfcforx7Q5q5qk5MXVNGMwTGREHnQx8w95lhQCrfG-Od7h62jv-avKPg/exec"
-  style="display:none">
-  <input id="idTokenInput" type="hidden" name="idToken" value="">
-</form>
-
 <script>
 const LIFF_ID = "2011019665-wbKBw2hK";
+const ENDPOINT_URL = "https://okacchi581123-rgb.github.io/okada-reservation/";
 
-function showError(message) {
-  document.getElementById("status").textContent = "予約画面を開けませんでした。";
-  document.getElementById("error").textContent =
-    message || "LINEからもう一度開いてください。";
+function setDebug(lines) {
+  document.getElementById("debug").innerHTML = lines.join("<br>");
+}
+
+function fail(message, extra) {
+  document.getElementById("spinner").style.display = "none";
+  document.getElementById("title").textContent = "LINE認証を確認できませんでした";
+  document.getElementById("status").textContent = "";
+  document.getElementById("error").textContent = message || "もう一度お試しください。";
+  if (extra) setDebug([String(extra)]);
 }
 
 async function start() {
   try {
-    if (!window.liff) {
-      showError("LINE認証の読み込みに失敗しました。");
-      return;
-    }
+    setDebug([
+      "STEP 1: LIFF SDK読込済み",
+      "URL: " + location.href
+    ]);
 
-    await liff.init({ liffId: LIFF_ID });
+    await liff.init({
+      liffId: LIFF_ID
+    });
+
+    setDebug([
+      "STEP 2: liff.init 成功",
+      "isInClient: " + String(liff.isInClient()),
+      "isLoggedIn: " + String(liff.isLoggedIn()),
+      "URL: " + location.href
+    ]);
 
     if (!liff.isLoggedIn()) {
-      liff.login();
+      document.getElementById("status").textContent = "LINEログインへ移動します。";
+      liff.login({
+        redirectUri: ENDPOINT_URL
+      });
       return;
     }
 
     const idToken = liff.getIDToken();
 
     if (!idToken) {
-      showError("LINE認証情報を取得できませんでした。");
+      fail("ID Tokenを取得できませんでした。");
       return;
     }
 
-    document.getElementById("idTokenInput").value = idToken;
-    document.getElementById("status").textContent = "登録情報を確認しています。";
-    document.getElementById("bridgeForm").submit();
+    document.getElementById("spinner").style.display = "none";
+    document.getElementById("ok").style.display = "block";
+    document.getElementById("title").textContent = "LINE認証成功";
+    document.getElementById("status").textContent =
+      "工程9のLIFF認証は正常に動作しています。";
+    document.getElementById("status").className = "success";
+
+    setDebug([
+      "STEP 3: ID Token取得成功",
+      "isInClient: " + String(liff.isInClient()),
+      "isLoggedIn: " + String(liff.isLoggedIn()),
+      "LIFF version: " + String(liff.getVersion()),
+      "URL: " + location.href
+    ]);
+
   } catch (error) {
-    console.error("LIFF起動エラー", error);
-    showError("LINE認証に失敗しました。LINEからもう一度開いてください。");
+    console.error(error);
+    fail(
+      "LIFF初期化またはログイン処理でエラーが発生しました。",
+      error && (error.code || error.message || error)
+    );
   }
 }
 
