@@ -2,10 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
   >
+
   <title>オカダスポーツ予約</title>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -19,8 +21,12 @@
     body {
       margin: 0;
       min-height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-        "Noto Sans JP", sans-serif;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Noto Sans JP",
+        sans-serif;
       background: #edf1f5;
       color: #071f3d;
     }
@@ -34,12 +40,13 @@
 
     .panel {
       width: min(380px, 92vw);
-      background: #fff;
+      background: #ffffff;
       border: 1px solid #d4e2ec;
       border-radius: 18px;
       padding: 28px 22px;
       text-align: center;
-      box-shadow: 0 12px 32px rgba(7, 31, 61, 0.12);
+      box-shadow:
+        0 12px 32px rgba(7, 31, 61, 0.12);
     }
 
     .spinner {
@@ -81,40 +88,159 @@
 <body>
   <main>
     <section class="panel">
-      <div id="spinner" class="spinner" aria-hidden="true"></div>
-      <h1 id="title">予約画面を開いています</h1>
-      <p id="status">LINE登録情報を確認しています。</p>
-      <p id="error" class="error"></p>
+      <div
+        id="spinner"
+        class="spinner"
+        aria-hidden="true"
+      ></div>
+
+      <h1 id="title">
+        予約画面を開いています
+      </h1>
+
+      <p id="status">
+        LINE登録情報を確認しています。
+      </p>
+
+      <p
+        id="error"
+        class="error"
+      ></p>
     </section>
   </main>
 
   <form
     id="gasBridge"
     method="post"
-   action="https://script.google.com/macros/s/AKfycbxMBNdSLimZNbXfcforx7Q5q5qk5MXVNGMwTGREHnQx8w95lhQCrfG-Od7h62jv-avKPg/exec"
+    action="https://script.google.com/macros/s/AKfycbxMBNdSLimZNbXfcforx7Q5q5qk5MXVNGMwTGREHnQx8w95lhQCrfG-Od7h62jv-avKPg/exec"
     style="display: none"
   >
-    <input id="idTokenInput" type="hidden" name="idToken" value="">
+    <input
+      id="idTokenInput"
+      type="hidden"
+      name="idToken"
+      value=""
+    >
   </form>
 
   <script>
-    const LIFF_ID = "2011019665-wbKBw2hK";
+    const LIFF_ID =
+      "2011019665-wbKBw2hK";
+
     const ENDPOINT_URL =
       "https://okacchi581123-rgb.github.io/okada-reservation/";
 
+    const TOKEN_REFRESH_KEY =
+      "okadaLiffTokenRefreshAttempted";
+
+    let bridgeSubmitted = false;
+
     function fail(message) {
-      document.getElementById("spinner").style.display = "none";
-      document.getElementById("title").textContent =
+      document.getElementById(
+        "spinner"
+      ).style.display = "none";
+
+      document.getElementById(
+        "title"
+      ).textContent =
         "予約画面を開けませんでした";
-      document.getElementById("status").textContent = "";
-      document.getElementById("error").textContent =
-        message || "LINEからもう一度開いてください。";
+
+      document.getElementById(
+        "status"
+      ).textContent = "";
+
+      document.getElementById(
+        "error"
+      ).textContent =
+        message ||
+        "LINEからもう一度開いてください。";
+    }
+
+    function isIdTokenExpired() {
+      const decodedToken =
+        liff.getDecodedIDToken();
+
+      if (
+        !decodedToken ||
+        !decodedToken.exp
+      ) {
+        return true;
+      }
+
+      const currentTime =
+        Math.floor(Date.now() / 1000);
+
+      return (
+        decodedToken.exp <=
+        currentTime + 60
+      );
+    }
+
+    function refreshLoginOnce() {
+      const refreshAttempted =
+        sessionStorage.getItem(
+          TOKEN_REFRESH_KEY
+        ) === "1";
+
+      if (refreshAttempted) {
+        sessionStorage.removeItem(
+          TOKEN_REFRESH_KEY
+        );
+
+        fail(
+          "LINE認証を更新できませんでした。画面を閉じて、LINEからもう一度開いてください。"
+        );
+
+        return;
+      }
+
+      document.getElementById(
+        "status"
+      ).textContent =
+        "LINE認証を更新しています。";
+
+      /*
+       * LIFFブラウザ内では、liff.login()を
+       *直接実行できません。
+       */
+      if (liff.isInClient()) {
+        fail(
+          "LINE認証の有効期限が切れました。画面を閉じて、LINEからもう一度開いてください。"
+        );
+
+        return;
+      }
+
+      sessionStorage.setItem(
+        TOKEN_REFRESH_KEY,
+        "1"
+      );
+
+      if (liff.isLoggedIn()) {
+        liff.logout();
+      }
+
+      const refreshUrl =
+        new URL(ENDPOINT_URL);
+
+      refreshUrl.searchParams.set(
+        "refresh",
+        Date.now().toString()
+      );
+
+      liff.login({
+        redirectUri:
+          refreshUrl.toString()
+      });
     }
 
     async function start() {
       try {
         if (!window.liff) {
-          fail("LINE認証の読み込みに失敗しました。");
+          fail(
+            "LINE認証の読み込みに失敗しました。"
+          );
+
           return;
         }
 
@@ -123,7 +249,9 @@
         });
 
         if (!liff.isLoggedIn()) {
-          document.getElementById("status").textContent =
+          document.getElementById(
+            "status"
+          ).textContent =
             "LINEログインへ移動します。";
 
           liff.login({
@@ -133,21 +261,45 @@
           return;
         }
 
-        const idToken = liff.getIDToken();
+        const idToken =
+          liff.getIDToken();
 
-        if (!idToken) {
-          fail("LINE認証情報を取得できませんでした。");
+        if (
+          !idToken ||
+          isIdTokenExpired()
+        ) {
+          refreshLoginOnce();
           return;
         }
 
-        document.getElementById("status").textContent =
+        sessionStorage.removeItem(
+          TOKEN_REFRESH_KEY
+        );
+
+        if (bridgeSubmitted) {
+          return;
+        }
+
+        bridgeSubmitted = true;
+
+        document.getElementById(
+          "status"
+        ).textContent =
           "登録情報を確認しています。";
 
-        document.getElementById("idTokenInput").value = idToken;
-        document.getElementById("gasBridge").submit();
+        document.getElementById(
+          "idTokenInput"
+        ).value = idToken;
+
+        document.getElementById(
+          "gasBridge"
+        ).submit();
 
       } catch (error) {
-        console.error("LIFF起動エラー", error);
+        console.error(
+          "LIFF起動エラー",
+          error
+        );
 
         fail(
           "LINE認証に失敗しました。LINEからもう一度開いてください。"
