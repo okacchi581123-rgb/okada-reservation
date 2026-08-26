@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>予約システム・複製環境テスト</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f2f6f9;color:#082747;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}main{max-width:560px;margin:auto;padding:28px 18px}.card{background:#fff;border:2px solid #d7e4ec;border-radius:18px;padding:24px 20px}h1{margin:0 0 14px;font-size:24px}.status{margin-top:20px;padding:18px;border-radius:13px;background:#eef5f9;line-height:1.65;font-weight:700}.error{background:#fff0f0;color:#a22121}
+  </style>
+</head>
+<body>
+  <main><section class="card">
+    <h1>複製予約システム</h1>
+    <p>本番とは別のテスト環境を開いています。</p>
+    <div id="status" class="status">LINE認証を確認しています…</div>
+  </section></main>
+  <form id="bridge" method="post" action="https://script.google.com/macros/s/AKfycbySF8Ht4MqfTBtcepNc0WjJ7npPO5uaB8YNY37kyjQrYZSKgPXsFv5R96Cr8hZVH37keA/exec">
+    <input id="idToken" type="hidden" name="idToken">
+  </form>
+  <script>
+    const LIFF_ID='2011019665-wbKBw2hK';
+    const status=document.getElementById('status');
+    function fail(message){status.textContent=message;status.classList.add('error')}
+    liff.init({liffId:LIFF_ID}).then(function(){
+      if(!liff.isLoggedIn()){liff.login();return}
+      const token=liff.getIDToken();
+      if(!token){fail('LINE認証情報を取得できませんでした。画面を閉じて、もう一度開いてください。');return}
+      document.getElementById('idToken').value=token;
+      status.textContent='複製した予約画面を開いています…';
+      document.getElementById('bridge').submit();
+    }).catch(function(error){
+      console.error(error);
+      fail('LINE認証を開始できませんでした。');
+    });
+  </script>
+</body>
+</html>
