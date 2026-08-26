@@ -1,0 +1,3070 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <title>オカダスポーツ予約</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  
+  <style>
+    :root{--navy:#0b2948;--blue:#0878c9;--cyan:#12a8d8;--orange:#f39800;--light:#edf7fd;--border:#d4e2ec;--red:#b42318;--muted:#637487}
+    *{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;margin:0;background:linear-gradient(160deg,#eef7fc 0,#f8fafc 45%,#eef3f7 100%);color:#172a3a;min-height:100vh}
+    main{max-width:720px;margin:auto;padding:0 16px 36px}.brand{margin:0 -16px 18px;padding:26px 18px 30px;text-align:center;color:#fff;background:linear-gradient(120deg,var(--navy),#075f99 62%,var(--cyan));border-radius:0 0 28px 28px;box-shadow:0 10px 28px #0b29482e}.brand-mark{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.14em;font-weight:800;background:#ffffff1f;border:1px solid #ffffff42;padding:6px 11px;border-radius:999px;margin-bottom:9px}.brand h1{font-size:27px;line-height:1.25;margin:0}.brand p{margin:7px 0 0;color:#dff5ff;font-size:13px}
+    .card{background:#fff;border:1px solid #e5edf3;border-radius:18px;padding:20px;margin-bottom:15px;box-shadow:0 8px 25px #1937500d}
+    h2{font-size:17px;margin:0 0 14px;display:flex;align-items:center;gap:9px;color:var(--navy)}h2 .step{display:inline-grid;place-items:center;width:29px;height:29px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#fff;font-size:14px;box-shadow:0 4px 10px #0878c940}.hidden{display:none!important}
+    label{display:block;font-weight:700;margin:12px 0 6px;color:#30485b;font-size:14px}input,select,textarea{width:100%;padding:13px 14px;border:1px solid var(--border);border-radius:11px;font-size:16px;background:#fbfdff;outline:none;transition:.2s}input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #12a8d81c;background:#fff}
+    textarea{min-height:90px;resize:vertical}button{border:0;border-radius:11px;padding:12px 14px;font-size:16px;font-weight:750;cursor:pointer;transition:transform .15s,box-shadow .15s}button:active{transform:scale(.98)}
+    .primary{width:100%;background:linear-gradient(110deg,var(--blue),var(--cyan));color:#fff;margin-top:14px;box-shadow:0 7px 16px #0878c92c}.secondary{width:100%;background:var(--light);color:var(--blue);margin-top:10px}.danger{background:#fff0f0;color:var(--red)}
+    .dates,.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.date-btn,.slot-btn{background:#fff;border:1px solid var(--border);padding:10px 5px;font-size:14px}.selected{background:var(--blue)!important;color:#fff!important;border-color:var(--blue)!important}
+    .week-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.week-nav button{background:var(--light);color:var(--blue);font-size:14px}.week-nav button:disabled{opacity:.4}.grid-wrap{overflow-x:auto;overflow-y:visible;border:1px solid var(--border);border-radius:13px;background:#fff}.availability{border-collapse:separate;border-spacing:0;min-width:620px;width:100%;font-size:13px}.availability th,.availability td{border-right:1px solid #e5edf3;border-bottom:1px solid #e5edf3;text-align:center;padding:8px 4px;min-width:70px}.availability thead th{position:sticky;top:0;background:var(--navy);color:#fff;z-index:2}.availability thead small{display:block;margin-top:3px;color:#ffd28a;font-weight:800}.availability .time{position:sticky;left:0;background:#f7fbfe;color:var(--navy);font-weight:800;z-index:1}.availability thead .time{background:var(--navy);color:#fff;z-index:3}.availability button{padding:2px 9px;background:#e9f9f0;color:#0a9a52;font-size:20px;border-radius:999px}.availability button:hover{background:#0a9a52;color:#fff}.availability .closed{color:#c0c9d0;background:#f3f6f8}.availability .break-band{background:#fff4de;color:#9b5b00;font-weight:800;letter-spacing:.08em;padding:13px}.grid-legend{font-size:13px;margin:9px 0 0;color:var(--muted)}.back-link{background:#fff;color:var(--navy);border:1px solid var(--border);font-size:14px;margin-bottom:12px}
+    .disabled{opacity:.4;pointer-events:none}.message{margin-top:12px;padding:10px;border-radius:8px;background:var(--light)}.change-mode-notice{margin:0 0 12px;background:#fff0f0;color:#7a1b16;border-left:5px solid #d71920!important}.error{background:#fff0f0;color:var(--red)}
+    .student-refund-notice{margin:12px 0 2px;padding:11px 12px;background:#fff0f0;color:#8a241c;border:1px solid #f3c7c3;border-left:5px solid #d71920;border-radius:11px;font-size:clamp(12.5px,3.4vw,14px);font-weight:800;line-height:1.45;overflow-wrap:anywhere}
+    details{margin-top:12px}summary{font-weight:700;cursor:pointer}.summary-row{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;gap:12px}.summary-row span:last-child{text-align:right}
+    .loading{opacity:.6;pointer-events:none}.top-actions{display:grid;grid-template-columns:1fr;gap:9px;margin-bottom:15px}.top-actions button{font-size:13px;background:#fff;color:var(--navy);border:1px solid var(--border);box-shadow:0 4px 12px #1937500b}
+    .birth-selects{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:8px}.birth-selects select{min-width:0;padding-left:10px;padding-right:8px}
+    /* トリコロール：ネイビー／イエロー／レッド */
+    body{background:linear-gradient(160deg,#edf1f5 0,#fff 48%,#e9eef3 100%)}
+    .brand{background:linear-gradient(125deg,#071f3d,#103b68);border-bottom:5px solid #ffd400;box-shadow:0 10px 28px #071f3d35}
+    .brand-mark{background:#ffd400;color:#071f3d;border:0;font-weight:900}.brand p{color:#fff2a3}
+    h2 .step{background:#ffd400;color:#071f3d;box-shadow:0 4px 10px #ffd40045}
+    input:focus,select:focus,textarea:focus{border-color:#103b68;box-shadow:0 0 0 3px #103b681c}
+    .primary{background:#071f3d;border-bottom:4px solid #ffd400;box-shadow:0 7px 16px #071f3d2c}.secondary{color:#071f3d}
+    .week-nav button{background:#071f3d;color:#fff;border-bottom:3px solid #ffd400}.availability thead th{background:#071f3d}.availability thead small{color:#ffd400}
+    .availability button{padding:0 7px;background:#fff;color:#d71920;font-size:24px;font-weight:900}.availability button:hover{background:#d71920;color:#fff}
+    .availability .break-band{background:#071f3d;color:#ffd400;font-weight:900;letter-spacing:.12em}.message{border-left:5px solid #ffd400}
+    .brand p{font-size:16px;font-weight:800;letter-spacing:.08em}
+    .menu-options{display:grid;gap:8px}.menu-choice{width:100%;display:grid;grid-template-columns:8.2em minmax(9em,1fr) 7.4em;align-items:center;text-align:left;background:#fff;color:#071f3d;border:1px solid var(--border);padding:12px 13px;font-size:14px}.menu-choice:hover{border-color:#103b68;background:#f7f9fb}.menu-choice.selected{background:#071f3d!important;color:#fff!important;border-color:#071f3d!important;box-shadow:inset 4px 0 #ffd400}.menu-choice .menu-main{font-weight:900;white-space:nowrap}.menu-choice .menu-main.wide{grid-column:1/3}.menu-choice .menu-detail{white-space:nowrap}.menu-choice .menu-status{grid-column:3;white-space:nowrap;border-left:2px solid #d9e0e6;padding-left:10px;font-weight:800}.menu-choice .menu-status:empty{border-left:0;padding-left:0}.menu-choice .menu-desc{grid-column:1/-1;margin-top:7px;padding-top:7px;border-top:1px dashed #d9e0e6;color:#5e6d79;font-size:12px;font-weight:650}.menu-choice .menu-price{grid-column:1/-1;margin-top:8px;color:#071f3d;font-size:16px;font-weight:900;text-align:right}.menu-choice.selected .menu-desc{color:#dbe8f5;border-top-color:#49627c}.menu-choice.selected .menu-price{color:#ffd400}.holiday-cell{background:#dfe3e7!important;color:#7c8792!important;font-size:17px;font-weight:900}.availability .closed{color:#aeb8c1;background:#f7f8fa;font-size:17px;font-weight:900}.availability button{color:#d71920!important;background:transparent!important;font-size:22px}.availability button.selected{color:#d71920!important;background:transparent!important;border:0!important;box-shadow:none!important}.grid-wrap{border:2px solid #071f3d}.availability .time{background:#f3f5f7}.availability .available-cell{background:#fff}.availability th.saturday{color:#8fd3ff}.availability th.sunday{color:#ff6b6b}.availability th.day-off{background:#071f3d;color:#ff6b6b}
+    .menu-more-button{width:100%;min-height:50px;margin-top:2px;border:2px solid #cbdde9;background:#edf7fd;color:#071f3d;font-size:15px;font-weight:850;box-shadow:none}
+    .booking-footer{position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:20;width:min(720px,100%);display:grid;grid-template-columns:1fr 150px;gap:12px;align-items:center;background:#071f3d;color:#fff;padding:12px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #071f3d45}.booking-footer strong,.booking-footer small{display:block}.booking-footer small{margin-top:3px;color:#dce7f1}.booking-footer button{background:#d71920;color:#fff;height:48px}.booking-footer button:disabled{background:#687789}.footer-countdown{color:#ffd400!important;font-weight:800}
+    @media(max-width:520px){
+      .menu-choice{grid-template-columns:minmax(0,1fr) auto auto;font-size:14px;padding:13px 10px;overflow:hidden}
+      .menu-choice .menu-main{grid-column:1;grid-row:1;min-width:0;white-space:nowrap;line-height:1.3;font-size:clamp(11.5px,3.65vw,14px)}
+      .menu-choice .menu-main.wide{grid-column:1}
+      .menu-choice .menu-detail{grid-column:2;grid-row:1;margin-left:5px;white-space:nowrap;text-align:left;font-size:clamp(9.5px,3vw,11.5px);line-height:1.3;font-weight:800}
+      .menu-choice .menu-status{grid-column:3;grid-row:1;margin-left:6px;padding:4px 0 4px 7px;white-space:nowrap;line-height:1.25;text-align:left;font-size:clamp(10px,3.1vw,12px)}
+      .menu-choice .menu-desc{grid-column:1/-1;color:#40556a;font-size:13px;line-height:1.55;font-weight:750;overflow-wrap:anywhere}
+      .menu-choice .menu-price{grid-column:1/-1;max-width:100%;font-size:clamp(13px,3.8vw,16px);line-height:1.4;white-space:normal;overflow-wrap:anywhere}
+    }
+    @media(max-width:380px){.dates,.slots{grid-template-columns:repeat(2,1fr)}}
+
+    /* 工程8：スマホ全画面・アプリ風UI */
+    html,body{width:100%;height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%;touch-action:pan-x pan-y}
+    body{min-height:0;background:#edf1f5}
+    @supports (-webkit-touch-callout:none){input,select,textarea{font-size:20px!important;line-height:1.3;transform:translateZ(0)}}
+    html.ios-device input,html.ios-device select,html.ios-device textarea{font-size:26px!important;line-height:1.3;min-height:60px;transform:translateZ(0)}
+    main#app{width:100%;max-width:720px;height:100%;height:100dvh;margin:0 auto;padding:0 14px calc(18px + env(safe-area-inset-bottom));overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;background:linear-gradient(160deg,#edf1f5 0,#fff 48%,#e9eef3 100%)}
+    main#app.booking-footer-visible{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+    .app-nav{position:sticky;top:0;z-index:40;display:grid;grid-template-columns:112px 1fr 112px;align-items:center;min-height:calc(58px + env(safe-area-inset-top));margin:0 -14px;padding:env(safe-area-inset-top) 12px 0;background:#071f3df5;color:#fff;border-bottom:4px solid #ffd400;box-shadow:0 5px 18px #071f3d38;backdrop-filter:blur(10px)}
+    .app-nav-title{text-align:center;font-size:16px;font-weight:900;letter-spacing:.03em;white-space:nowrap}
+    .app-nav button{min-height:42px;padding:8px 10px;border:1px solid #ffffff55;background:#ffffff12;color:#fff;border-radius:10px;font-size:13px;font-weight:850;box-shadow:none}
+    .app-nav .nav-spacer{width:112px}
+    .brand{margin:0 -14px 16px;padding:22px 16px 24px;border-radius:0 0 24px 24px}
+    .brand h1{font-size:clamp(22px,6.2vw,27px)}
+    .brand-mark{min-height:32px;padding:7px 13px}
+    .card{padding:18px 16px;margin-bottom:14px;border-radius:16px}
+    h2{font-size:18px;line-height:1.4;margin-bottom:16px}
+    h2 .step{width:34px;height:34px;font-size:15px;flex:0 0 auto}
+    label{margin:15px 0 7px;font-size:15px}
+    input,select,textarea{min-height:52px;padding:14px 15px;border-width:2px;border-radius:12px;font-size:17px}
+    textarea{min-height:112px}
+    button{min-height:52px;padding:13px 15px;border-radius:12px;font-size:16px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    .primary{min-height:56px;margin-top:16px;font-size:17px}
+    .secondary{min-height:54px;font-size:16px}
+    .top-actions{gap:10px;margin:14px 0}.top-actions button{min-height:52px;font-size:15px;font-weight:850}
+    details>summary{display:flex;align-items:center;min-height:50px;padding:8px 2px;font-size:16px}
+    .menu-options{gap:10px}.menu-choice{min-height:64px;padding:14px 13px;font-size:14px;border-width:2px;border-radius:13px}
+    .menu-choice .menu-desc{font-size:13px;line-height:1.5}
+    .week-nav{gap:10px}.week-nav button{min-height:52px;font-size:15px}
+    .back-link{width:100%;min-height:50px;font-size:15px}
+    .summary-row{min-height:46px;align-items:center;padding:10px 0;font-size:15px}
+    .message{padding:13px 14px;font-size:15px;line-height:1.5}
+    .booking-footer{grid-template-columns:minmax(0,1fr) 142px;padding:13px 14px calc(13px + env(safe-area-inset-bottom))}.booking-footer button{height:54px;min-height:54px;font-size:16px}
+    .availability button{min-width:44px;min-height:44px;padding:4px 9px!important}
+    .availability th,.availability td{height:52px}
+    @media(max-width:520px){
+      main#app{padding-left:10px;padding-right:10px}
+      .app-nav{grid-template-columns:104px 1fr 104px;margin-left:-10px;margin-right:-10px;padding-left:9px;padding-right:9px}
+      .app-nav .nav-spacer{width:104px}.app-nav-title{font-size:15px}.app-nav button{font-size:12.5px;padding:8px}
+      .brand{margin-left:-10px;margin-right:-10px}
+      .card{padding:17px 14px}
+      input,select,textarea{font-size:20px!important;line-height:1.3;transform:translateZ(0)}
+      .menu-choice{grid-template-columns:minmax(6.8em,1fr) minmax(7.2em,1.1fr) minmax(6.2em,.85fr);font-size:13px;padding:13px 10px}
+    }
+    @media(max-width:390px){
+      .app-nav{grid-template-columns:92px 1fr 92px}.app-nav .nav-spacer{width:92px}.app-nav button{font-size:12px;padding:7px 5px}
+      .card{padding:16px 12px}.menu-choice{grid-template-columns:1fr 1fr}.menu-choice .menu-status{grid-column:2}.menu-choice .menu-desc{grid-column:1/-1}.menu-choice .menu-main.wide{grid-column:1}
+    }
+   /* 工程9：5営業日表示・横スクロール廃止 */
+.grid-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+min-height: 0;
+overflow-x: clip;
+overflow-y: visible;
+overscroll-behavior: auto;
+-webkit-overflow-scrolling: auto;
+  isolation: isolate;
+}
+
+.availability {
+  width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.availability th,
+.availability td {
+  min-width: 0 !important;
+  max-width: none !important;
+  width: auto;
+  height: 52px;
+  padding: 6px 1px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.availability thead th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #071f3d;
+  box-shadow: inset 0 -4px #ffd400;
+  backface-visibility: hidden;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.availability .time {
+  position: sticky;
+  left: 0;
+  z-index: 18;
+  width: 58px !important;
+  min-width: 58px !important;
+  max-width: 58px !important;
+  background: #f3f5f7;
+  backface-visibility: hidden;
+  font-size: 13px;
+}
+
+.availability thead .time {
+  top: 0;
+  left: 0;
+  z-index: 22;
+  background: #071f3d;
+}
+
+.availability button {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 2px !important;
+}
+
+
+html.ios-device .birth-selects select {
+  min-height: 56px;
+  padding: 8px 28px 8px 8px;
+  font-size: 20px !important;
+  text-align: center;
+}
+.menu-choice {
+  grid-template-columns: max-content max-content minmax(0, 1fr) !important;
+  column-gap: 6px;
+  align-items: center;
+}
+
+.menu-choice .menu-main {
+  grid-column: 1 !important;
+  min-width: 0;
+  white-space: nowrap;
+  font-size: clamp(12px, 3.1vw, 15px);
+}
+
+.menu-choice .menu-detail {
+  grid-column: 2 !important;
+  white-space: nowrap;
+  font-size: clamp(11px, 2.9vw, 14px);
+}
+
+.menu-choice .menu-status {
+  grid-column: 3 !important;
+  justify-self: end;
+  white-space: nowrap;
+  font-size: clamp(11px, 2.9vw, 14px);
+  border-left: 2px solid var(--border);
+  padding-left: 8px;
+}
+
+.menu-choice .menu-desc,
+.menu-choice .menu-price {
+  grid-column: 1 / -1 !important;
+}
+/* 工程9：共通ローディング画面 */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(7, 31, 61, 0.68);
+  backdrop-filter: blur(3px);
+}
+
+.loading-panel {
+  width: min(360px, 90vw);
+  padding: 26px 20px;
+  text-align: center;
+  background: #fff;
+  border: 2px solid #071f3d;
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(7, 31, 61, 0.3);
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  border: 5px solid #d4e2ec;
+  border-top-color: #071f3d;
+  border-right-color: #ffd400;
+  border-radius: 50%;
+  animation: loading-spin 0.8s linear infinite;
+}
+
+.loading-title {
+  color: #071f3d;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.loading-detail {
+  min-height: 1.5em;
+  margin-top: 8px;
+  color: #637487;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* v137：空き状況取得時は画面全体へ薄いグレーのフィルターを表示 */
+.loading-overlay.availability-loading-mode {
+  background: rgba(225, 230, 235, 0.78);
+  backdrop-filter: blur(2px);
+}
+
+.loading-overlay.availability-loading-mode .loading-panel {
+  width: min(330px, 86vw);
+  padding: 23px 18px;
+}
+
+.loading-overlay.availability-loading-mode .loading-spinner {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 13px;
+}
+/* v138：予約管理ボタンを受診者カード直下の通常配置へ変更 */
+.reservation-fixed-bar{
+  position:static;
+  /* v141：メニュー項目と左右の基準線を統一 */
+  margin:-4px 12px 12px;
+  padding:0;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+
+.reservation-fixed-bar button{
+  width:100%;
+  min-height:52px;
+  border:2px solid #cbdde9;
+  border-radius:14px;
+  background:#edf7fd;
+  color:#071f3d;
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:.03em;
+  box-shadow:none;
+}
+.reservation-compact-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 64px;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #dbe5ee;
+}
+
+.reservation-compact-date {
+  white-space: nowrap;
+  font-weight: 800;
+  color: #071f3d;
+}
+
+.reservation-compact-menu {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #071f3d;
+}
+
+.reservation-change-button {
+  width: 64px;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px;
+  border: 0;
+  border-radius: 10px;
+  background: #071f3d;
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.reservation-action-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.reservation-action-sheet {
+  width: min(520px, 100%);
+  padding: 22px 18px
+    calc(22px + env(safe-area-inset-bottom));
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 -10px 30px
+    rgba(7, 31, 61, 0.2);
+}
+
+.reservation-action-sheet h3 {
+  margin: 0 0 16px;
+  text-align: center;
+  color: #071f3d;
+}
+
+.reservation-action-sheet button {
+  width: 100%;
+}
+/* 予約日時表：日付行を上部へ固定 */
+.grid-wrap {
+  overflow: visible !important;
+  isolation: auto;
+}
+
+.availability thead th {
+  position: sticky;
+  top: calc(
+    58px + env(safe-area-inset-top)
+  );
+  z-index: 60;
+}
+
+.availability thead .time {
+  position: sticky;
+  top: calc(
+    58px + env(safe-area-inset-top)
+  );
+  left: 0;
+  z-index: 62;
+}
+/* 症状・要望ポップアップを上部固定 */
+#noteCard {
+  align-items: flex-start;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+#noteCard .reservation-action-sheet {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+/* 完了結果は高齢者にも一目で伝わる大見出しにする */
+#completeCard h2 {
+  display: block;
+  font-size: 28px;
+  line-height: 1.35;
+  margin-bottom: 20px;
+}
+
+#completeCard .summary-row {
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+/* v121：ヘッダーを簡潔にし、通常操作ボタンを同じ見た目へ統一 */
+.brand {
+  padding-top: 22px;
+  padding-bottom: 22px;
+  border-bottom-width: 2px;
+  border-radius: 0 0 12px 12px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 5.8vw, 27px);
+  letter-spacing: .16em;
+  font-weight: 700;
+}
+
+.app-nav {
+  border-bottom-width: 2px;
+}
+
+.reservation-announcement {
+  max-width: 620px;
+  margin: 12px auto 0 !important;
+  padding: 10px 14px;
+  border: 1px solid #ffd400;
+  border-radius: 8px;
+  background: #ffd4000d;
+  color: #ffd400 !important;
+  font-size: 14px !important;
+  line-height: 1.55;
+  letter-spacing: 0 !important;
+  font-weight: 750 !important;
+}
+
+/* v124：予約開始画面の情報量を整理 */
+.brand {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 8px;
+}
+
+.brand h1 {
+  font-size: clamp(18px, 4.8vw, 22px);
+  letter-spacing: .12em;
+}
+
+.reservation-announcement {
+  margin-top: 8px !important;
+}
+
+.section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.section-heading-row h2 {
+  margin: 0;
+}
+
+.family-toggle-button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 8px 12px;
+  background: #edf7fd;
+  color: #071f3d;
+  border: 2px solid #cbdce8;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.family-add-details[open] {
+  margin-top: 14px;
+  padding-top: 4px;
+  border-top: 1px solid #e5edf3;
+}
+
+.menu-choice .menu-desc {
+  display: none;
+}
+
+.menu-choice .menu-price {
+  margin-top: 6px;
+  font-size: clamp(13px, 3.6vw, 15px);
+}
+
+/* v125：受診者・メニューを読みやすいまま省スペース化 */
+#visitorCard,
+#menuCard {
+  padding: 10px 12px;
+  margin-bottom: 6px;
+}
+
+/* v127：受診者選択からメニューまでの移動量をさらに削減 */
+#visitorCard {
+  margin-bottom: 2px;
+}
+
+#visitorCard .section-heading-row {
+  margin-bottom: 6px;
+}
+
+#visitorCard select {
+  min-height: 48px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+#menuCard h2 {
+  margin-bottom: 6px;
+}
+
+#menuCard .menu-options {
+  gap: 6px;
+}
+
+#menuCard .menu-choice {
+  min-height: 52px;
+  padding: 7px 10px;
+}
+
+#menuCard .menu-choice .menu-main {
+  font-size: clamp(15px, 4.1vw, 17px);
+  line-height: 1.35;
+}
+
+#menuCard .menu-choice .menu-detail,
+#menuCard .menu-choice .menu-status {
+  font-size: clamp(12px, 3.3vw, 14px);
+}
+
+#menuCard .menu-choice .menu-price {
+  margin-top: 4px;
+  font-size: clamp(14px, 3.8vw, 16px);
+  line-height: 1.3;
+}
+
+/* 中身のない操作欄が作っていたヘッダー下の余白を除去 */
+.top-actions:empty {
+  display: none !important;
+  margin: 0 !important;
+}
+
+/* v127：店名は予約画面全体と揃えた日本語表記にする */
+.brand h1 {
+  font-family: inherit;
+  font-size: clamp(18px, 4.8vw, 22px);
+  letter-spacing: .08em;
+  font-weight: 800;
+}
+
+.primary,
+.secondary,
+.danger,
+.week-nav button,
+.back-link,
+.reservation-change-button,
+.top-actions button,
+.reservation-action-sheet button {
+  background: #edf7fd !important;
+  color: #071f3d !important;
+  border: 2px solid #cbdce8 !important;
+  border-bottom: 2px solid #cbdce8 !important;
+  box-shadow: none !important;
+}
+
+.primary:disabled,
+.secondary:disabled,
+.danger:disabled,
+.week-nav button:disabled,
+.back-link:disabled,
+.reservation-change-button:disabled,
+.top-actions button:disabled,
+.reservation-action-sheet button:disabled {
+  background: #e1e5e9 !important;
+  color: #7c8792 !important;
+  border-color: #d3d8dd !important;
+  opacity: 1 !important;
+}
+
+/* 枠選択後の「次へ」だけは決定へ進む赤ボタンを維持 */
+.booking-footer button,
+.booking-footer button:not(:disabled) {
+  background: #d71920 !important;
+  color: #fff !important;
+  border: 2px solid #d71920 !important;
+  box-shadow: none !important;
+}
+
+.booking-footer button:disabled {
+  background: #687789 !important;
+  color: #fff !important;
+  border-color: #687789 !important;
+}
+  </style>
+</head>
+<body>
+<div
+  id="loadingOverlay"
+  class="loading-overlay hidden"
+  role="status"
+  aria-live="polite"
+  aria-busy="true"
+>
+  <div class="loading-panel">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <div id="loadingTitle" class="loading-title">
+      登録情報を確認しています
+    </div>
+    <div id="loadingDetail" class="loading-detail"></div>
+  </div>
+</div>  
+<main id="app">
+  <nav class="app-nav" aria-label="予約画面ナビゲーション"><div class="nav-spacer" aria-hidden="true"></div><div class="app-nav-title">WEB予約</div><div class="nav-spacer" aria-hidden="true"></div></nav>
+  <header class="brand" id="brandHeader"><h1>オカダスポーツ</h1><p id="reservationAnnouncement" class="reservation-announcement hidden" aria-live="polite"></p></header>
+<div class="top-actions hidden" id="topActions"></div>
+  <section class="card hidden" id="registrationCard">
+    <h2><span class="step">✓</span>初回登録</h2>
+    <label>氏名</label><input id="regName" autocomplete="name">
+    <label>フリガナ</label><input id="regKana">
+    <label>生年月日</label>
+
+<div class="birth-selects">
+  <select
+    id="regBirthYear"
+    aria-label="生年月日の年"
+    onchange="updateBirthDays('reg')"
+  ></select>
+
+  <select
+    id="regBirthMonth"
+    aria-label="生年月日の月"
+    onchange="updateBirthDays('reg')"
+  ></select>
+
+  <select
+    id="regBirthDay"
+    aria-label="生年月日の日"
+    onchange="syncBirthDate('reg')"
+  >
+    <option value="">日</option>
+  </select>
+</div>
+
+<input id="regBirth" type="hidden">
+
+    <label>電話番号</label>
+    <input id="regPhone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="11" placeholder="ハイフンなし" oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)">
+
+    <label>性別</label>
+    <select id="regGender">
+      <option value="">選択してください</option>
+      <option>男性</option>
+      <option>女性</option>
+    </select>
+    <button class="primary" onclick="registerSelf()">登録して予約へ進む</button>
+    <div id="regMessage"></div>
+  </section>
+
+  <div id="bookingArea" class="hidden">
+<section class="card" id="visitorCard">
+      <div class="section-heading-row">
+        <h2>受診する方</h2>
+        <button type="button" class="family-toggle-button" onclick="toggleFamilyForm()">家族を追加する</button>
+      </div>
+      <select id="visitor" onchange="visitorChanged()"></select>
+      <details id="familyFormDetails" class="family-add-details"><summary class="hidden">家族を追加する</summary>
+        <label>受診者氏名</label><input id="familyName">
+        <label>フリガナ</label><input id="familyKana">
+                <label>生年月日</label>
+
+<div class="birth-selects">
+  <select
+    id="familyBirthYear"
+    aria-label="家族の生年月日の年"
+    onchange="updateBirthDays('family')"
+  ></select>
+
+  <select
+    id="familyBirthMonth"
+    aria-label="家族の生年月日の月"
+    onchange="updateBirthDays('family')"
+  ></select>
+
+  <select
+    id="familyBirthDay"
+    aria-label="家族の生年月日の日"
+    onchange="syncBirthDate('family')"
+  >
+    <option value="">日</option>
+  </select>
+</div>
+
+<input id="familyBirth" type="hidden">
+
+        <label>性別</label>
+        <select id="familyGender">
+          <option value="">選択してください</option>
+          <option>男性</option>
+          <option>女性</option>
+        </select>
+        <button class="secondary" onclick="addFamily()">家族を登録</button><div id="familyMessage"></div>
+      </details>
+    </section>
+
+    <div
+      class="reservation-fixed-bar hidden"
+      id="reservationFixedBar"
+    >
+      <button
+        type="button"
+        onclick="showReservations()"
+      >
+        予約の確認・変更・キャンセル
+      </button>
+    </div>
+
+    <section class="card hidden" id="menuCard">
+      <h2>メニュー</h2><div id="menuOptions" class="menu-options"></div><select id="menu" class="hidden"><option value="">選択してください</option></select>
+    </section>
+
+    <section class="card hidden" id="slotCard">
+      <button class="back-link" onclick="backToMenu()">← 受診者・メニュー選択へ戻る</button>
+     <div class="week-nav">
+  <button id="prevWeek" onclick="changeWeek(-1)">
+    ← 前の5営業日
+  </button>
+  <button id="nextWeek" onclick="changeWeek(1)">
+    次の5営業日 →
+  </button>
+</div>
+      <div class="message change-mode-notice hidden" id="changeModeNotice">
+        <strong>日時変更中</strong><br>
+        <span id="changeModeOriginal"></span>
+      </div>
+      <div class="grid-wrap" id="availabilityGrid"></div>
+      <p class="grid-legend">◎ 予約可能　－ 受付不可</p>
+      <div id="slotMessage"></div>
+      <button
+        type="button"
+        class="secondary hidden"
+        id="changeModeBackBtn"
+        onclick="cancelReservationChange()"
+      >
+        日時変更をやめて戻る
+      </button>
+    </section>
+
+<div
+  class="reservation-action-overlay hidden"
+  id="noteCard"
+>
+  <div
+    class="reservation-action-sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="notePromptTitle"
+  >
+    <h3 id="notePromptTitle">
+      症状・ご要望（任意）
+    </h3>
+
+    <div
+      class="message"
+      id="noteSelectedSlot"
+    ></div>
+
+    <textarea
+      id="note"
+      maxlength="200"
+      placeholder="例：サッカー／右足首の痛み／テーピング希望"
+    ></textarea>
+
+    <small>
+      <span id="noteCount">0</span>/200文字
+    </small>
+
+    <button
+      type="button"
+      class="primary"
+      onclick="proceedToConfirmation(false)"
+    >
+予約内容を確認する
+    </button>
+
+    <button
+      type="button"
+      class="secondary"
+      onclick="closeNotePrompt()"
+    >
+予約枠へ戻る
+    </button>
+
+  </div>
+</div>    <section class="card hidden" id="confirmCard"><h2 id="confirmTitle">予約内容確認</h2><div id="confirmDetails"></div><button class="primary" id="confirmBtn" onclick="confirmFromFooter()">この内容で予約する</button><button class="secondary" onclick="backToSlots()">時間を選び直す</button><div id="confirmMessage"></div></section>
+    <section class="card hidden" id="completeCard"><h2>予約が完了しました</h2><div id="completeDetails"></div><button class="primary" onclick="showReservations()">現在の予約を確認する</button><button class="secondary" onclick="startAnotherReservation()">受診者・メニューへ戻る</button></section>
+    <section class="card hidden" id="reservationsCard"><h2>現在の予約</h2><div id="reservationList"></div><button class="secondary" onclick="closeReservations()">予約画面へ戻る</button></section>
+  </div>
+  
+  <div class="booking-footer hidden" id="bookingFooter"><div><strong id="footerDate">時間を確保中...</strong><small id="footerMenu"></small><small class="footer-countdown" id="footerCountdown"></small></div><button id="footerReserveBtn" onclick="openNotePrompt()" disabled>予約する</button></div>
+<div
+  class="reservation-action-overlay hidden"
+  id="reservationActionOverlay"
+>
+  <div
+    class="reservation-action-sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-label="予約の変更またはキャンセル"
+  >
+    <div
+      class="message error hidden"
+      id="reservationCancelConfirmDetails"
+    >
+      <strong id="reservationCancelTarget"></strong><br>
+      <span>この予約をキャンセルしますか？</span>
+    </div>
+
+    <button
+      type="button"
+      class="primary"
+      id="reservationDateChangeBtn"
+    >
+      日時を変更
+    </button>
+
+    <button
+      type="button"
+      class="secondary"
+      id="reservationCancelBtn"
+    >
+      予約をキャンセル
+    </button>
+
+    <button
+      type="button"
+      class="secondary"
+      onclick="closeReservationActions()"
+    >
+      戻る
+    </button>
+  </div>
+</div>
+
+<div
+  class="reservation-action-overlay hidden"
+  id="dependentCancellationOverlay"
+>
+  <div
+    class="reservation-action-sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="dependentCancellationTitle"
+  >
+    <h3 id="dependentCancellationTitle">
+      再診予約の確認
+    </h3>
+
+    <p id="dependentCancellationMessage"></p>
+
+    <p>
+      対象予約：
+      <strong id="dependentCancellationCount">0</strong>件
+    </p>
+
+    <button
+      type="button"
+      class="danger"
+      onclick="continueWithDependentCancellation()"
+    >
+      再診をキャンセルして変更する
+    </button>
+
+    <button
+      type="button"
+      class="secondary"
+      onclick="closeDependentCancellationWarning()"
+    >
+      変更しない
+    </button>
+  </div>
+</div>
+
+<div
+  class="reservation-action-overlay hidden"
+  id="initialCancellationOverlay"
+>
+  <div
+    class="reservation-action-sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="initialCancellationTitle"
+  >
+    <h3 id="initialCancellationTitle">
+      初診予約キャンセルの確認
+    </h3>
+
+    <p id="initialCancellationMessage"></p>
+
+    <div
+      id="initialCancellationAffectedList"
+      class="message"
+    ></div>
+
+    <button
+      type="button"
+      class="danger"
+      onclick="continueInitialAndRevisitCancellation()"
+    >
+      初診と再診をキャンセルする
+    </button>
+
+    <button
+      type="button"
+      class="secondary"
+      onclick="closeInitialCancellationWarning()"
+    >
+      キャンセルしない
+    </button>
+  </div>
+</div>
+
+</main>
+<script>
+const STAGE6_UI_VERSION="38";
+const STAGE9_UI_VERSION="58-LINE-BRIDGE";
+const LIFF_ID="2011019665-wbKBw2hK";
+const GAS_API_URL="https://script.google.com/macros/s/AKfycbySF8Ht4MqfTBtcepNc0WjJ7npPO5uaB8YNY37kyjQrYZSKgPXsFv5R96Cr8hZVH37keA/exec";
+const developmentMenuMode=false;
+const initialLineUserId="";
+let initialRegistrantId="";
+let lineAuthError="";
+let apiIdToken="";
+if(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)){document.documentElement.classList.add('ios-device')}
+const registrationTestMode=new URLSearchParams(location.search).get("registrationTest")==="1";
+const state={registrantId:registrationTestMode?"":(initialRegistrantId||(localStorage.getItem("okadaRegistrantId")||"")),lineUserId:registrationTestMode?"":(initialLineUserId||""),visitorId:"",date:"",menu:"",menuMinutes:30,menuMeta:{},slot:null,lockId:"",processing:false,dates:[],week:0,gridResults:{},prefetching:{},expiresAt:0,countdownTimer:null,
+excludeReservationId:"",
+confirmCancelEarlierRevisits:false,
+changeOriginalReservation:null,
+currentReservations:[],
+availableMenus:[],
+preferredMenuHistory:"",
+menuExpanded:false};
+const $ = id => document.getElementById(id);
+  function gas(name,args,onSuccess,onFailure){
+    fetch(GAS_API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({
+        apiVersion:"1",
+        action:name,
+        args:Array.isArray(args)?args:[],
+        idToken:apiIdToken
+      }),
+      redirect:"follow"
+    })
+      .then(function(response){
+        if(!response.ok)throw new Error("HTTP "+response.status);
+        return response.json();
+      })
+      .then(function(envelope){
+        if(!envelope||envelope.success!==true){
+          throw new Error(envelope&&envelope.message?envelope.message:"通信に失敗しました");
+        }
+        if(typeof onSuccess==="function")onSuccess(envelope.data);
+      })
+      .catch(function(error){
+        (onFailure||showFatal)(error);
+      });
+  }
+  function showFatal(e){alert("処理に失敗しました。時間をおいて再度お試しください。");console.error(e)}
+  function setMessage(id,text,error){$(id).innerHTML=text?'<div class="message '+(error?'error':'')+'">'+text+'</div>':''}
+function loadReservationAnnouncement() {
+  const announcement = $("reservationAnnouncement");
+
+  if (!announcement) return;
+
+  gas(
+    "getReservationScreenAnnouncement",
+    [],
+    function(result) {
+      const text = String(
+        result && result.success
+          ? result.announcement || ""
+          : ""
+      ).trim();
+
+      announcement.textContent = text;
+      announcement.classList.toggle("hidden", !text);
+    },
+    function(error) {
+      announcement.textContent = "";
+      announcement.classList.add("hidden");
+      console.warn(
+        "予約画面のお知らせを取得できませんでした。",
+        error
+      );
+    }
+  );
+}
+function showDependentCancellationWarning(result) {
+  $("dependentCancellationMessage").textContent =
+    String(
+      result.message ||
+      "変更後の初診日時より前になる再診予約があります。"
+    );
+
+  $("dependentCancellationCount").textContent =
+    String(Number(result.affectedCount || 0));
+
+  $("dependentCancellationOverlay")
+    .classList.remove("hidden");
+}
+
+function closeDependentCancellationWarning() {
+  state.confirmCancelEarlierRevisits = false;
+
+  $("dependentCancellationOverlay")
+    .classList.add("hidden");
+}
+
+function continueWithDependentCancellation() {
+  $("dependentCancellationOverlay")
+    .classList.add("hidden");
+
+  state.confirmCancelEarlierRevisits = true;
+  confirmFromFooter();
+}
+let pendingInitialCancellationReservationId = "";
+
+function showInitialCancellationWarning(
+  reservationId,
+  result
+) {
+  pendingInitialCancellationReservationId =
+    String(reservationId || "");
+
+  $("initialCancellationMessage").textContent =
+    String(result.message || "");
+
+  const affected = Array.isArray(
+    result.affectedReservations
+  )
+    ? result.affectedReservations
+    : [];
+
+  $("initialCancellationAffectedList").innerHTML =
+    affected.length
+      ? affected.map(function(item) {
+          return (
+            "<div>" +
+            escapeHtml(
+              formatReservationDateTimeWithWeekday(
+                item.date,
+                item.startTime
+              ) +
+              "／" +
+              String(item.menuName || "再診")
+            ) +
+            "</div>"
+          );
+        }).join("")
+      : "対象となる再診予約があります。";
+
+  $("initialCancellationOverlay")
+    .classList.remove("hidden");
+}
+
+function closeInitialCancellationWarning() {
+  pendingInitialCancellationReservationId = "";
+
+  $("initialCancellationOverlay")
+    .classList.add("hidden");
+}
+
+function continueInitialAndRevisitCancellation() {
+  const reservationId =
+    pendingInitialCancellationReservationId;
+
+  closeInitialCancellationWarning();
+
+  if (reservationId) {
+    cancelCurrentReservation(
+      reservationId,
+      true
+    );
+  }
+}
+  let loadingShowTimer = null;
+let loadingLongTimer = null;
+let activeLoadingId = 0;
+
+function startLoading(title, showImmediately, loadingMode) {
+  const loadingId = ++activeLoadingId;
+
+  clearTimeout(loadingShowTimer);
+  clearTimeout(loadingLongTimer);
+
+  $("loadingTitle").textContent =
+    title || "処理しています";
+
+  $("loadingDetail").textContent = "";
+  $("loadingOverlay").classList.toggle(
+    "availability-loading-mode",
+    loadingMode === "availability"
+  );
+  $("loadingOverlay").classList.toggle(
+    "hidden",
+    !showImmediately
+  );
+
+  if (!showImmediately) {
+    loadingShowTimer = setTimeout(function() {
+      if (loadingId !== activeLoadingId) return;
+
+      $("loadingOverlay").classList.remove("hidden");
+    }, 400);
+  }
+
+  loadingLongTimer = setTimeout(function() {
+    if (loadingId !== activeLoadingId) return;
+
+    $("loadingDetail").textContent =
+      "処理に少し時間がかかっています。そのままお待ちください。";
+  }, 3000);
+
+  return loadingId;
+}
+
+function stopLoading(loadingId) {
+  if (loadingId !== activeLoadingId) return;
+
+  clearTimeout(loadingShowTimer);
+  clearTimeout(loadingLongTimer);
+
+  $("loadingOverlay").classList.add("hidden");
+  $("loadingOverlay").classList.remove(
+    "availability-loading-mode"
+  );
+  $("loadingDetail").textContent = "";
+}
+function closeLineView() {
+  if (window.liff && liff.isInClient()) {
+    liff.closeWindow();
+    return;
+  }
+
+  window.history.back();
+}function initBirthSelectors(prefix){ const currentYear=new Date().getFullYear(); const year=$(prefix+"BirthYear");    const month=$(prefix+"BirthMonth");
+    year.innerHTML='<option value="">年</option>';
+    for(let y=currentYear;y>=1900;y--){year.insertAdjacentHTML("beforeend",'<option value="'+y+'">'+y+'</option>')}
+    month.innerHTML='<option value="">月</option>';
+    for(let m=1;m<=12;m++){month.insertAdjacentHTML("beforeend",'<option value="'+m+'">'+m+'</option>')}
+  }
+  function updateBirthDays(prefix){
+    const year=$(prefix+"BirthYear").value;
+    const month=$(prefix+"BirthMonth").value;
+    const daySelect=$(prefix+"BirthDay");
+    const previous=daySelect.value;
+    daySelect.innerHTML='<option value="">日</option>';
+    if(year&&month){
+      const lastDay=new Date(Number(year),Number(month),0).getDate();
+      for(let d=1;d<=lastDay;d++){daySelect.insertAdjacentHTML("beforeend",'<option value="'+d+'">'+d+'</option>')}
+      if(previous&&Number(previous)<=lastDay){daySelect.value=previous}
+    }
+    syncBirthDate(prefix);
+  }
+  function syncBirthDate(prefix){
+    const year=$(prefix+"BirthYear").value;
+    const month=$(prefix+"BirthMonth").value;
+    const day=$(prefix+"BirthDay").value;
+    $(prefix+"Birth").value=year&&month&&day?year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0'):'';
+  }
+
+  function boot() {
+  loadReservationAnnouncement();
+  initBirthSelectors("reg");
+  initBirthSelectors("family");
+
+  if (registrationTestMode) {
+    state.registrantId = "";
+    state.lineUserId = "";
+    $("registrationCard").classList.remove("hidden");
+    return;
+  }
+
+  if (lineAuthError) {
+    $("registrationCard").classList.remove("hidden");
+   setMessage(
+  "regMessage",
+  "LINE認証を確認できませんでした。LINEの予約ボタンからもう一度開いてください。",
+  true
+);
+    return;
+  }
+
+  if (state.registrantId) {
+    localStorage.setItem("okadaRegistrantId", state.registrantId);
+    openBooking();
+    return;
+  }
+
+  $("registrationCard").classList.remove("hidden");
+}
+function registerSelf(){if(!$("regBirth").value){setMessage("regMessage","生年月日の年・月・日をすべて選択してください",true);return}const p={name:$("regName").value,kana:$("regKana").value,phone:$("regPhone").value,birthDate:$("regBirth").value,gender:$("regGender").value,lineUserId:state.lineUserId};setMessage("regMessage","登録中...",true);gas("registerOrFindRegistrant",[p],r=>{if(!r.success){setMessage("regMessage",r.message,true);return}state.registrantId=r.registrantId;localStorage.setItem("okadaRegistrantId",r.registrantId);openBooking()},e=>setMessage("regMessage","登録に失敗しました",true))}
+function openBooking() {
+  const loadingId = startLoading(    "登録情報を確認しています"
+  );
+
+  $("registrationCard").classList.add("hidden");
+  $("bookingArea").classList.remove("hidden");
+  $("topActions").classList.remove("hidden");
+  $("reservationFixedBar").classList.remove("hidden");
+
+  gas(
+    "getStage6BookingBootstrap",
+    [state.registrantId],
+    function(r) {
+      if (!r || !r.success) {
+        stopLoading(loadingId);
+        localStorage.removeItem(
+          "okadaRegistrantId"
+        );
+
+        state.registrantId = "";
+        state.visitorId = "";
+
+        $("bookingArea").classList.add("hidden");
+        $("topActions").classList.add("hidden");
+        $("reservationFixedBar").classList.add("hidden");
+        $("registrationCard").classList.remove(
+          "hidden"
+        );
+
+        setMessage(
+          "regMessage",
+          "登録情報を確認できなかったため、初回登録をお願いします。",
+          false
+        );
+
+        return;
+      }
+
+      state.dates = r.dates || [];
+
+      const list = r.visitors || [];
+      const visitorSelect = $("visitor");
+
+      visitorSelect.innerHTML = list
+        .map(function(v) {
+          return (
+            '<option value="' +
+            v.visitorId +
+            '">' +
+            v.name +
+            "（" +
+            (v.category || "区分確認中") +
+            "）</option>"
+          );
+        })
+        .join("");
+
+      if (!list.length) {
+        stopLoading(loadingId);
+        return;
+      }
+
+      state.visitorId =
+        r.selectedVisitorId ||
+        list[0].visitorId;
+
+      visitorSelect.value = state.visitorId;
+
+      state.menu = "";
+      state.menuMeta = {};
+      state.availableMenus = [];
+      state.preferredMenuHistory = "";
+      state.menuExpanded = false;
+      state.slot = null;
+      state.week = 0;
+      state.gridResults = {};
+      state.prefetching = {};
+
+      hideBookingFooter();
+      $("slotCard").classList.add("hidden");
+      $("noteCard").classList.add("hidden");
+
+      loadMenus(false, loadingId);
+    },
+    function(error) {
+      stopLoading(loadingId);
+      console.error(error);
+
+      alert(
+        "予約画面の読み込みに失敗しました。通信状態を確認して、もう一度お試しください。"
+      );
+    }
+  );
+}
+  function loadVisitors(){gas("getStage4VisitorsForRegistrant",[state.registrantId],list=>{const s=$("visitor");s.innerHTML=list.map(v=>'<option value="'+v.visitorId+'">'+v.name+'（'+(v.category||'区分確認中')+'）</option>').join('');if(list.length){state.visitorId=list[0].visitorId;s.value=state.visitorId;visitorChanged()}})}
+  function toggleFamilyForm(){
+    const details=$("familyFormDetails");
+    if(!details)return;
+    details.open=!details.open;
+    const button=document.querySelector(".family-toggle-button");
+    if(button)button.textContent=details.open?"家族入力を閉じる":"家族を追加する";
+  }
+  function addFamily(){if(!$("familyBirth").value){setMessage("familyMessage","生年月日の年・月・日をすべて選択してください",true);return}const p={registrantId:state.registrantId,name:$("familyName").value,kana:$("familyKana").value,birthDate:$("familyBirth").value,gender:$("familyGender").value,relationship:"家族",isSelf:false};setMessage("familyMessage","登録中...");gas("registerOrFindVisitor",[p],r=>{if(!r.success){setMessage("familyMessage",r.message,true);return}setMessage("familyMessage","登録しました");loadVisitors()})}
+  function visitorChanged(){state.visitorId=$("visitor").value;state.menu="";state.menuMeta={};state.availableMenus=[];state.preferredMenuHistory="";state.menuExpanded=false;state.slot=null;state.week=0;state.gridResults={};state.prefetching={};hideBookingFooter();$("menu").innerHTML='<option value="">選択してください</option>';$("menuOptions").innerHTML="";$("menuCard").classList.add("hidden");$("slotCard").classList.add("hidden");$("noteCard").classList.add("hidden");loadMenus(true)}
+  function menuParts(name,minutes,meta){
+    const supplied=meta||state.menuMeta[name];
+    if(supplied&&(supplied.displayMenuName||supplied.priceText)){
+      let priceText=supplied.priceText||minutes+"分";
+      if(supplied.medicalCategory==="保険"){
+        if(supplied.patientCategory==="学生"){
+          priceText="受給者証提示で窓口負担なし";
+        }else if(name==="保険再診"){
+          priceText="一般 1〜3割：1,400〜1,800円";
+        }
+      }
+      return [supplied.displayMenuName||name,supplied.supplementaryText||"",supplied.targetText||"",supplied.description||"",priceText];
+    }
+    const map={"保険初診":["健康保険","","はじめての方","原因と受傷日が明確な捻挫・打撲・挫傷など","一般3,000円／学生0円（適用時）"],"保険再診":["健康保険","","再診","健康保険施術を継続して受ける方","1割1,400円／2割1,600円／3割1,800円"],"保険＋自費":["健康保険","（自費施術60分）","再診","全身や関連部位まで詳しく施術したい方","60分・5,000円（税込）"],"自賠責初診":["自賠責保険","（交通事故）","はじめての方","交通事故によるケガで保険適用を受ける方","適用時 窓口負担0円"],"自賠責再診":["自賠責保険","（交通事故）","再診","交通事故によるケガで保険適用を継続する方","適用時 窓口負担0円"],"労災初診":["労災保険","（仕事・通勤中のケガ）","はじめての方","仕事中・通勤中のケガで労災適用を受ける方","適用時 窓口負担0円"],"労災再診":["労災保険","（仕事・通勤中のケガ）","再診","仕事中・通勤中のケガで労災適用を継続する方","適用時 窓口負担0円"],"初回お試し":["初回お試し","（自費診療）","はじめての方","保険を使わず自費施術を受けてみたい方・1人1回","45分・3,000円（税込）"],"はじめてのからだ相談":["はじめてのからだ相談","（自費診療）","はじめての方","症状やコース選びを相談してから施術を受けたい方","45分・3,000円（税込）"],"コンディショニング":["コンディショニング","","どなたでも","慢性的な痛み・疲労回復・身体のメンテナンス","45分・5,000円（税込）"],"スポーツケア":["スポーツケア","","どなたでも","競技復帰・再発予防・フォームや動作の改善","60分・7,000円（税込）"]};return map[name]||[name,"",minutes+"分","",minutes+"分"]
+  }
+  function displayMenuPrice(value){
+    return String(value||"")
+      .replace(/[（(]\s*適用時\s*[）)]/g,"")
+      .replace(/^\s*適用時\s*/,"")
+      .replace(/[（(]\s*税込\s*[）)]/g,"")
+      .replace(/窓口負担\s*0円/g,"窓口負担なし")
+      .trim();
+  }
+function menuChoiceHtml(m) {
+  const p = menuParts(m.menuName, m.minutes, m);
+  const wide = p[3] ? " wide" : "";
+
+  return (
+    '<button type="button" class="menu-choice" ' +
+    'onclick="selectMenu(this,\'' +
+    m.menuName +
+    "'," +
+    m.minutes +
+    ')">' +
+    '<span class="menu-main' +
+    wide +
+    '">' +
+    p[0] +
+    "</span>" +
+    (p[1]
+      ? '<span class="menu-detail">' + p[1] + "</span>"
+      : "") +
+    '<span class="menu-status">' +
+    p[2] +
+    "</span>" +
+    (p[3]
+      ? '<span class="menu-desc">' + p[3] + "</span>"
+      : "") +
+    (p[4]
+      ? '<span class="menu-price">' +
+        displayMenuPrice(p[4]) +
+        "</span>"
+      : "") +
+    "</button>"
+  );
+}
+
+function preferredMenuForDisplay(menus, historyMenuName) {
+  const names = menus.map(function(m) {
+    return String(m.menuName || "");
+  });
+  const history = String(historyMenuName || "");
+
+  function firstMatching(prefix, preferredName) {
+    if (names.indexOf(preferredName) !== -1) {
+      return preferredName;
+    }
+
+    return names.find(function(name) {
+      return name.indexOf(prefix) === 0;
+    }) || "";
+  }
+
+  if (
+    history === "保険初診" ||
+    history === "保険再診"
+  ) {
+    return firstMatching("保険", "保険再診");
+  }
+
+  if (history.indexOf("自賠責") === 0) {
+    return firstMatching("自賠責", "自賠責再診");
+  }
+
+  if (history.indexOf("労災") === 0) {
+    return firstMatching("労災", "労災再診");
+  }
+
+  return names.indexOf(history) !== -1
+    ? history
+    : "";
+}
+
+function isFirstChoiceTransition(historyMenuName) {
+  const history = String(historyMenuName || "");
+
+  return (
+    history === "初回お試し" ||
+    history.indexOf("からだ相談") !== -1
+  );
+}
+
+function renderMenuOptions() {
+  let menus = Array.isArray(state.availableMenus)
+    ? state.availableMenus.slice()
+    : [];
+  const transition = isFirstChoiceTransition(
+    state.preferredMenuHistory
+  );
+
+  if (transition) {
+    menus = menus.filter(function(m) {
+      return m.menuName !== "初回お試し";
+    });
+  }
+
+  const preferredMenuName = transition
+    ? ""
+    : preferredMenuForDisplay(
+        menus,
+        state.preferredMenuHistory
+      );
+  const otherMenus = preferredMenuName
+    ? menus.filter(function(m) {
+        return m.menuName !== preferredMenuName;
+      })
+    : [];
+  const visibleMenus =
+    preferredMenuName && !state.menuExpanded
+      ? menus.filter(function(m) {
+          return m.menuName === preferredMenuName;
+        })
+      : menus;
+
+  let html = visibleMenus.map(menuChoiceHtml).join("");
+
+  if (preferredMenuName && otherMenus.length) {
+    html +=
+      '<button type="button" class="menu-more-button" ' +
+      'onclick="toggleOtherMenus()">' +
+      (state.menuExpanded
+        ? "－ その他のメニューを閉じる"
+        : "＋ その他のメニューを表示") +
+      "</button>";
+  }
+
+  $("menuOptions").innerHTML = html;
+}
+
+function toggleOtherMenus() {
+  state.menuExpanded = !state.menuExpanded;
+  renderMenuOptions();
+}
+
+function renderMenus(r) {
+  const menus =
+    r && Array.isArray(r.menus)
+      ? r.menus
+      : [];
+  const s = $("menu");
+
+  state.menuMeta = {};
+  state.availableMenus = menus;
+  state.preferredMenuHistory = String(
+    r && r.preferredMenuName
+      ? r.preferredMenuName
+      : ""
+  );
+  state.menuExpanded = false;
+
+  menus.forEach(function(m) {
+    state.menuMeta[m.menuName] = m;
+  });
+
+  s.innerHTML =
+    '<option value="">選択してください</option>' +
+    menus
+      .map(function(m) {
+        return (
+          '<option value="' +
+          m.menuName +
+          '">' +
+          m.menuName +
+          "</option>"
+        );
+      })
+      .join("");
+
+  renderMenuOptions();
+
+  $("menuCard").classList.remove("hidden");
+  $("slotCard").classList.add("hidden");
+  $("noteCard").classList.add("hidden");
+}
+
+let menuLoadRequestId = 0;
+
+function loadMenus(
+  showVisitorSwitch,
+  existingLoadingId
+) {
+  const firstOpen = state.dates.find(
+    function(d) {
+      return d.available;
+    }
+  );
+
+  if (!firstOpen) {
+    if (existingLoadingId) {
+      stopLoading(existingLoadingId);
+    }
+    return;
+  }
+
+  const requestId = ++menuLoadRequestId;
+  const requestedVisitorId = state.visitorId;
+  const loadingId = existingLoadingId ||
+    (showVisitorSwitch
+      ? startLoading(
+          "受診者情報を切り替えています",
+          true
+        )
+      : null);
+
+  gas(
+    "getStage5MenusForVisitorWithPreference",
+    [
+      state.visitorId,
+      firstOpen.date,
+      developmentMenuMode
+    ],
+    function(r) {
+      if (
+        requestId !== menuLoadRequestId ||
+        requestedVisitorId !== state.visitorId
+      ) {
+        if (loadingId) stopLoading(loadingId);
+        return;
+      }
+
+      if (loadingId) stopLoading(loadingId);
+      renderMenus(r);
+    },
+    function(error) {
+      if (loadingId) stopLoading(loadingId);
+      console.error(error);
+      alert(
+        "受診者情報の切り替えに失敗しました。通信状態を確認して、もう一度お試しください。"
+      );
+    }
+  );
+}
+  function selectMenu(btn,name,minutes){document.querySelectorAll('.menu-choice').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');if(state.menu!==name){state.gridResults={};state.prefetching={};state.week=0}$("menu").value=name;state.menuMinutes=Number(minutes)||30;loadAvailabilityGrid()}
+  function businessDates() {
+  return state.dates.filter(function(d) {
+    return d.available;
+  });
+}
+
+function businessPageCount() {
+  return Math.max(
+    1,
+    Math.ceil(businessDates().length / 5)
+  );
+}
+
+function weekDates() {
+  return businessDates().slice(
+    state.week * 5,
+    state.week * 5 + 5
+  );
+}
+
+function changeWeek(delta) {
+  state.week = Math.max(
+    0,
+    Math.min(
+      businessPageCount() - 1,
+      state.week + delta
+    )
+  );
+
+  loadAvailabilityGrid();
+}
+
+function loadWeekData(weekIndex, visible, done) {
+  const targets = businessDates()
+    .slice(
+      weekIndex * 5,
+      weekIndex * 5 + 5
+    )
+    .filter(function(d) {
+      return !state.gridResults[d.date];
+    });
+
+  if (!targets.length) {
+    if (visible) renderAvailabilityGrid();
+    if (done) done();
+    return;
+  }
+
+  const targetDates = targets.map(function(d) {
+    return d.date;
+  });
+
+gas(
+  "getStage9AvailableSlotsBatch",
+  [
+    state.registrantId,
+    state.visitorId,
+    targetDates,
+    state.menu,
+    state.excludeReservationId || ""
+  ],
+    function(result) {
+      targets.forEach(function(d) {
+        state.gridResults[d.date] =
+          result &&
+          result.success &&
+          result.results &&
+          result.results[d.date]
+            ? result.results[d.date]
+            : { success: false };
+      });
+
+      if (visible) renderAvailabilityGrid();
+      if (done) done();
+    },
+    function() {
+      targets.forEach(function(d) {
+        state.gridResults[d.date] = {
+          success: false
+        };
+      });
+
+      if (visible) renderAvailabilityGrid();
+      if (done) done();
+    }
+  );
+}
+
+function prefetchWeek(weekIndex) {
+  if (
+    weekIndex >= businessPageCount() ||
+    state.prefetching[weekIndex]
+  ) {
+    return;
+  }
+
+  state.prefetching[weekIndex] = true;
+
+  loadWeekData(
+    weekIndex,
+    false,
+    function() {
+      prefetchWeek(weekIndex + 1);
+    }
+  );
+}
+ function loadAvailabilityGrid() {
+  if (!state.excludeReservationId) {
+    state.menu = $("menu").value;
+  }
+  state.slot = null;
+
+  if (!state.menu) {
+    $("slotCard").classList.add("hidden");
+    return;
+  }
+
+  const lastPage = Math.max(
+    0,
+    businessPageCount() - 1
+  );
+
+  state.week = Math.min(state.week, lastPage);
+
+  $("brandHeader").classList.add("hidden");
+  $("topActions").classList.add("hidden");
+  $("reservationFixedBar").classList.add("hidden");
+
+  document
+    .querySelector("#bookingArea > section:first-child")
+    .classList.add("hidden");
+
+  $("menuCard").classList.add("hidden");
+  $("slotCard").classList.remove("hidden");
+  $("noteCard").classList.add("hidden");
+
+  $("prevWeek").disabled = state.week === 0;
+  $("nextWeek").disabled = state.week >= lastPage;
+
+  const needsAvailabilityLoad = weekDates().some(
+    function(d) {
+      return !state.gridResults[d.date];
+    }
+  );
+
+  if (needsAvailabilityLoad) {
+    $("availabilityGrid").innerHTML = "";
+    $("prevWeek").disabled = true;
+    $("nextWeek").disabled = true;
+  } else {
+    renderAvailabilityGrid();
+  }
+
+  const availabilityLoadingId = needsAvailabilityLoad
+    ? startLoading(
+        "空き状況を確認しています",
+        true,
+        "availability"
+      )
+    : null;
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+  setMessage("slotMessage", "");
+
+  loadWeekData(
+    state.week,
+    true,
+    function() {
+      if (availabilityLoadingId) {
+        stopLoading(availabilityLoadingId);
+      }
+      $("prevWeek").disabled = state.week === 0;
+      $("nextWeek").disabled = state.week >= lastPage;
+      setMessage("slotMessage", "");
+      prefetchWeek(state.week + 1);
+    }
+  );
+}
+  function backToMenu(){hideBookingFooter();$("slotCard").classList.add("hidden");$("noteCard").classList.add("hidden");$("brandHeader").classList.remove("hidden");$("topActions").classList.remove("hidden");document.querySelector('#bookingArea > section:first-child').classList.remove('hidden');$("menuCard").classList.remove("hidden");window.scrollTo({top:0,behavior:'smooth'})}
+  function renderAvailabilityGrid(){const days=weekDates();const slotsFor=d=>{const r=state.gridResults[d.date];return r&&r.success?[...(r.morning||[]),...(r.afternoon||[])]:[]};let html='<table class="availability"><thead><tr><th class="time">時間</th>'+days.map(d=>{const cls=!d.available?'day-off':(d.label.indexOf('土')!==-1?'saturday':(d.label.indexOf('日')!==-1?'sunday':''));return '<th class="'+cls+'">'+d.label.replace('（','<br>（')+'</th>'}).join('')+'</tr></thead><tbody>';for(let m=10*60;m<=21*60+30;m+=15){if(m===13*60){html+='<tr><td class="break-band" colspan="'+(days.length+1)+'">休憩時間</td></tr>';m=15*60-15;continue}const time=stage6UiTime(m),previous=stage6UiTime(m-15);if(m%30!==0){const needed=state.menuMinutes===45&&days.some(d=>{if(!d.available)return false;const all=slotsFor(d);return all.some(s=>s.start===time)&&!all.some(s=>s.start===previous)});if(!needed)continue}html+='<tr><td class="time">'+time+'</td>';days.forEach(d=>{if(!d.available){html+='<td class="holiday-cell">－</td>';return}const all=slotsFor(d);const slot=all.find(s=>s.start===time);if(slot)html+='<td class="available-cell"><button onclick="selectGridSlot(this,\''+d.date+'\',\''+slot.start+'\',\''+slot.end+'\')">◎</button></td>';else html+='<td class="closed">－</td>'});html+='</tr>'}html+='</tbody></table>';$("availabilityGrid").innerHTML=html}
+  function stage6UiTime(minutes){return String(Math.floor(minutes/60)).padStart(2,'0')+':'+String(minutes%60).padStart(2,'0')}
+function selectGridSlot(btn, date, start, end) {
+  document
+    .querySelectorAll(".availability button")
+    .forEach(function(button) {
+      button.classList.remove("selected");
+    });
+
+  btn.classList.add("selected");
+
+  state.date = date;
+  state.slot = {
+    start: start,
+    end: end
+  };
+  state.lockId = "DIRECT";
+  state.expiresAt =
+    Date.now() + 2 * 60 * 1000;
+
+$("noteCard").classList.add("hidden");
+  showBookingFooter(
+    date,
+    start,
+    end
+  );
+
+  $("footerReserveBtn").disabled = false;
+
+  startFooterCountdown();
+}
+function showBookingFooter(date, start, end) {
+  const p = menuParts(
+    state.menu,
+    state.menuMinutes
+  );
+
+  $("reservationFixedBar")
+    .classList.add("hidden");
+
+  $("bookingFooter")
+    .classList.remove("hidden");
+  $("app").classList.add(
+    "booking-footer-visible"
+  );
+
+  $("footerDate").textContent =
+    formatReservationDateTimeWithWeekday(
+      date,
+      start
+    ) + "〜" + end;
+
+  $("footerMenu").textContent =
+    p[0] +
+    (p[1] ? " " + p[1] : "") +
+    (p[4] ? "｜" + displayMenuPrice(p[4]) : "");
+
+  $("footerCountdown").textContent =
+    "時間を確保中...";
+
+  $("footerReserveBtn").textContent =
+    String(state.excludeReservationId || "").trim()
+      ? "次へ"
+      : "予約する";
+
+  $("footerReserveBtn").disabled = true;
+}
+
+function hideBookingFooter() {
+  $("bookingFooter")
+    .classList.add("hidden");
+  $("app").classList.remove(
+    "booking-footer-visible"
+  );
+
+  if (state.countdownTimer) {
+    clearInterval(state.countdownTimer);
+  }
+
+  state.countdownTimer = null;
+
+  if (
+    !$("completeCard")
+      .classList.contains("hidden")
+  ) {
+    $("reservationFixedBar")
+      .classList.add("hidden");
+  } else {
+    $("reservationFixedBar")
+      .classList.remove("hidden");
+  }
+}function startFooterCountdown(){if(state.countdownTimer)clearInterval(state.countdownTimer);const tick=()=>{const left=Math.max(0,Math.ceil((state.expiresAt-Date.now())/1000));$("footerCountdown").textContent='確保時間 残り '+Math.floor(left/60)+':'+String(left%60).padStart(2,'0');if(!left){hideBookingFooter();state.lockId='';state.slot=null;alert('確保時間が終了しました。もう一度時間を選択してください。')}};tick();state.countdownTimer=setInterval(tick,1000)}
+function openNotePrompt() {
+  if (
+    state.processing ||
+    !state.lockId ||
+    !state.slot
+  ) {
+    return;
+  }
+
+  state.expiresAt =
+    Date.now() + 2 * 60 * 1000;
+  startFooterCountdown();
+
+  if (
+    String(
+      state.excludeReservationId || ""
+    ).trim()
+  ) {
+    showConfirmation();
+    return;
+  }
+
+  $("noteSelectedSlot").textContent =
+    state.date +
+    " " +
+    state.slot.start +
+    "〜" +
+    state.slot.end;
+
+  $("noteCard")
+    .classList.remove("hidden");
+}
+function closeNotePrompt() {
+  if (state.processing) return;
+
+  $("noteCard").classList.add("hidden");
+}
+function proceedToConfirmation(
+  skipNote
+) {
+  if (skipNote) {
+    $("note").value = "";
+    $("noteCount").textContent = "0";
+  }
+
+  state.expiresAt =
+    Date.now() + 2 * 60 * 1000;
+  startFooterCountdown();
+
+  $("noteCard")
+    .classList.add("hidden");
+
+  showConfirmation();
+}
+function confirmFromFooter() {
+  if (state.processing) {
+    return;
+  }
+
+  if (
+    !state.lockId ||
+    !state.slot
+  ) {
+    alert(
+      "確保時間が終了しました。もう一度時間を選択してください。"
+    );
+    backToSlots();
+    return;
+  }
+  const bookedDate = state.date;
+  const bookedStart = state.slot.start;
+
+  const isReservationChange =
+    !!String(
+      state.excludeReservationId || ""
+    ).trim();
+      const loadingId = startLoading(
+    isReservationChange
+      ? "予約日時を変更しています"
+      : "予約を確定しています"
+  );
+
+  state.processing = true;
+
+  $("footerReserveBtn").disabled = true;
+  $("footerReserveBtn").textContent =
+    "予約処理中...";
+
+  const payload = {
+    lockId: state.lockId,
+    registrantId: state.registrantId,
+    visitorId: state.visitorId,
+    date: bookedDate,
+    menuName: state.menu,
+    startTime: bookedStart,
+note: isReservationChange
+  ? ""
+  : $("note").value.trim(),
+    excludeReservationId:
+      state.excludeReservationId || "",
+    confirmCancelEarlierRevisits:
+      state.confirmCancelEarlierRevisits === true
+  };
+
+  let cancelledDependentCount = 0;
+  let cancelledDependentReservations = [];
+
+  function finishSuccess(
+    reservationId,
+    snapshotFailed
+  ) {
+        stopLoading(loadingId);
+    state.processing = false;
+
+    $("footerReserveBtn").textContent =
+      "予約する";
+
+    hideBookingFooter();
+    $("confirmCard")
+  .classList.add("hidden");
+
+$("noteCard")
+  .classList.add("hidden");
+
+    $("slotCard").classList.add("hidden");
+    $("reservationsCard").classList.add("hidden");
+    $("reservationList").innerHTML = "";
+    state.currentReservations = [];
+    $("brandHeader").classList.remove("hidden");
+    $("topActions").classList.remove("hidden");
+
+    const completeTitle =
+      $("completeCard")
+        .querySelector("h2");
+
+    if (completeTitle) {
+      completeTitle.textContent =
+        isReservationChange
+          ? "日時変更が完了しました"
+          : "予約が完了しました";
+    }
+
+    $("completeCard")
+      .classList.remove("hidden");
+
+    $("reservationFixedBar")
+      .classList.add("hidden");
+
+    const originalReservation =
+      state.changeOriginalReservation;
+
+    let completionRows =
+      row("予約ID", reservationId);
+
+    if (
+      isReservationChange &&
+      originalReservation
+    ) {
+      completionRows +=
+        row(
+          "変更前",
+          formatReservationDateTimeWithWeekday(
+            originalReservation.date,
+            originalReservation.start
+          ) +
+          "／" +
+          originalReservation.menu
+        ) +
+        row(
+          "変更後",
+          formatReservationDateTimeWithWeekday(
+            bookedDate,
+            bookedStart
+          ) +
+          "／" +
+          state.menu
+        );
+
+      cancelledDependentReservations.forEach(
+        function(item, index) {
+          completionRows += row(
+            "キャンセルした再診" +
+              (
+                cancelledDependentReservations.length > 1
+                  ? String(index + 1)
+                  : ""
+              ),
+            formatReservationDateTimeWithWeekday(
+              item.date,
+              item.startTime
+            ) +
+            "／" +
+            String(item.menuName || "保険再診")
+          );
+        }
+      );
+    } else {
+      completionRows += row(
+        "日時",
+        formatReservationDateTimeWithWeekday(
+          bookedDate,
+          bookedStart
+        )
+      );
+    }
+
+    $("completeDetails").innerHTML =
+      "<p>以下の内容をご確認ください。</p>" +
+      completionRows;
+
+    clearReservationInputs(false);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+    if (snapshotFailed) {
+      $("completeDetails").insertAdjacentHTML(
+        "beforeend",
+        '<div class="message error">空き枠情報の更新に失敗しました。予約処理は完了しています。</div>'
+      );
+      return;
+    }
+  }
+
+  gas(
+    "confirmStage6Reservation",
+    [payload],
+    function(result) {
+      if (!result || !result.success) {
+                stopLoading(loadingId);
+        state.processing = false;
+
+        $("footerReserveBtn").textContent =
+          "予約する";
+
+        $("footerReserveBtn").disabled =
+          false;
+
+        if (
+          result &&
+          result.requiresDependentCancellationConfirmation
+        ) {
+          showDependentCancellationWarning(result);
+          return;
+        }
+
+        state.confirmCancelEarlierRevisits = false;
+
+        alert(
+          result && result.message
+            ? result.message
+            : "予約処理に失敗しました"
+        );
+
+        return;
+      }
+
+      if (!isReservationChange) {
+        finishSuccess(
+          result.reservationId,
+          false
+        );
+        return;
+      }
+
+      cancelledDependentCount =
+        Number(
+          result.cancelledDependentCount || 0
+        );
+
+      cancelledDependentReservations =
+        Array.isArray(
+          result.cancelledDependentReservations
+        )
+          ? result.cancelledDependentReservations
+          : [];
+
+      $("footerReserveBtn").textContent =
+        "空き枠更新中...";
+
+      gas(
+        "rebuildStage9Snapshot",
+        [
+          "WEB予約日時変更後再構築"
+        ],
+        function(rebuildResult) {
+          finishSuccess(
+            result.reservationId,
+            !rebuildResult ||
+              !rebuildResult.success
+          );
+        },
+        function(rebuildError) {
+          console.error(
+            "日時変更後の空き枠再構築に失敗",
+            rebuildError
+          );
+
+          finishSuccess(
+            result.reservationId,
+            true
+          );
+        }
+      );
+    },
+    function(error) {
+              stopLoading(loadingId);
+      state.processing = false;
+
+      $("footerReserveBtn").textContent =
+        "予約する";
+
+      $("footerReserveBtn").disabled =
+        false;
+
+      console.error(error);
+
+      state.confirmCancelEarlierRevisits = false;
+
+      alert(
+        "予約処理に失敗しました。予約状況をご確認ください。"
+      );
+    }
+  );
+}
+function showConfirmation() {
+  if (!state.slot) {
+    return;
+  }
+
+  const visitor =
+    $("visitor")
+      .selectedOptions[0]
+      .textContent;
+
+  const menu =
+    menuParts(
+      state.menu,
+      state.menuMinutes
+    );
+
+  const isReservationChange =
+    !!String(
+      state.excludeReservationId || ""
+    ).trim();
+
+  const selectedMenuMeta =
+    state.menuMeta[state.menu] || {};
+
+  const showStudentRefundNotice =
+    !isReservationChange &&
+    selectedMenuMeta.medicalCategory === "保険" &&
+    selectedMenuMeta.patientCategory === "学生";
+
+  const noteText =
+    isReservationChange
+      ? "現在の登録内容を保持"
+      : (
+          $("note").value.trim() ||
+          "入力なし"
+        );
+
+  if (
+    isReservationChange &&
+    state.changeOriginalReservation
+  ) {
+    $("confirmTitle").textContent =
+      "日時変更内容の確認";
+
+    $("confirmBtn").textContent =
+      "この内容で日時変更する";
+
+    $("confirmDetails").innerHTML =
+      row("受診者", visitor) +
+      row(
+        "変更前",
+        formatReservationDateTimeWithWeekday(
+          state.changeOriginalReservation.date,
+          state.changeOriginalReservation.start
+        ) + "／" + state.changeOriginalReservation.menu
+      ) +
+      row(
+        "変更後",
+        formatReservationDateTimeWithWeekday(
+          state.date,
+          state.slot.start
+        ) + "／" + state.menu
+      ) +
+      row("症状・ご要望", noteText);
+  } else {
+    $("confirmTitle").textContent =
+      "予約内容確認";
+
+    $("confirmBtn").textContent =
+      "この内容で予約する";
+
+    $("confirmDetails").innerHTML =
+      row("受診者", visitor) +
+      row(
+        "日付",
+        formatReservationDateTimeWithWeekday(
+          state.date,
+          ""
+        ).trim()
+      ) +
+      row("メニュー", state.menu) +
+      row(
+        "料金",
+        menu[4] || "要確認"
+      ) +
+      row(
+        "時間",
+        state.slot.start +
+          "〜" +
+          state.slot.end
+      ) +
+      row(
+        "症状・ご要望",
+        noteText
+      ) +
+      (showStudentRefundNotice
+        ? '<div class="student-refund-notice">北本市以外の医療受給者証をお持ちの方は、窓口支払い後に市役所で返金申請が必要です。</div>'
+        : "");
+  }
+
+  $("noteCard")
+    .classList.add("hidden");
+
+  $("slotCard")
+    .classList.add("hidden");
+
+  $("bookingFooter")
+    .classList.add("hidden");
+
+  $("confirmCard")
+    .classList.remove("hidden");
+
+  const appScroller = $("app");
+  if (appScroller) {
+    appScroller.scrollTop = 0;
+    requestAnimationFrame(function() {
+      appScroller.scrollTop = 0;
+    });
+  } else {
+    window.scrollTo(0, 0);
+  }
+}
+  function row(a,b){return '<div class="summary-row"><span>'+a+'</span><span>'+escapeHtml(b)+'</span></div>'}
+  function escapeHtml(v){const d=document.createElement('div');d.textContent=String(v);return d.innerHTML}
+function formatReservationDateTimeWithWeekday(
+  dateText,
+  timeText
+) {
+  const parts = String(dateText || "")
+    .replace(/-/g, "/")
+    .split("/");
+
+  if (parts.length !== 3) {
+    return (
+      String(dateText || "") +
+      " " +
+      String(timeText || "")
+    ).trim();
+  }
+
+  const date = new Date(
+    Number(parts[0]),
+    Number(parts[1]) - 1,
+    Number(parts[2])
+  );
+
+  const weekdays = [
+    "日", "月", "火", "水", "木", "金", "土"
+  ];
+
+  return (
+    Number(parts[1]) + "/" +
+    Number(parts[2]) +
+    "（" + weekdays[date.getDay()] + "） " +
+    String(timeText || "")
+  );
+}
+  function confirmReservation(){if(state.processing)return;state.processing=true;$("confirmBtn").disabled=true;setMessage("confirmMessage","予約処理中...");const p={lockId:state.lockId,registrantId:state.registrantId,visitorId:state.visitorId,date:state.date,menuName:state.menu,startTime:state.slot.start,note:$("note").value,excludeReservationId:state.excludeReservationId||""};gas("confirmStage6Reservation",[p],r=>{state.processing=false;$("confirmBtn").disabled=false;if(!r.success){setMessage("confirmMessage",r.message,true);return}alert("予約が完了しました");$("confirmCard").classList.add("hidden");$("completeCard").classList.remove("hidden");$("completeDetails").innerHTML=row("予約ID",r.reservationId)+row("日時",state.date+' '+state.slot.start);clearReservationInputs(false)},e=>{state.processing=false;$("confirmBtn").disabled=false;setMessage("confirmMessage","予約処理に失敗しました",true)})}
+function clearReservationInputs(clearComplete){state.date="";state.menu="";state.slot=null;state.lockId="";state.excludeReservationId="";state.confirmCancelEarlierRevisits=false;state.changeOriginalReservation=null;state.week=0;state.gridResults={};state.prefetching={};hideBookingFooter();$("menu").value='';$("availabilityGrid").innerHTML='';$("note").value='';$("noteCount").textContent='0';$("changeModeNotice").classList.add('hidden');$("changeModeOriginal").textContent='';$("changeModeBackBtn").classList.add('hidden');$("slotCard").classList.add('hidden');$("noteCard").classList.add('hidden');if(clearComplete)$("completeCard").classList.add('hidden')}
+function startAnotherReservation() {
+  if (state.processing) {
+    return;
+  }
+
+  clearReservationInputs(true);
+
+  /* v129：再判定前の古いメニューを一瞬表示しない */
+  state.menuMeta = {};
+  $("menuOptions").innerHTML =
+    '<div class="message">メニューを確認しています...</div>';
+
+  $("reservationsCard")
+    .classList.add("hidden");
+
+  $("visitorCard")
+    .classList.remove("hidden");
+
+  $("menuCard")
+    .classList.remove("hidden");
+
+  $("slotCard")
+    .classList.add("hidden");
+
+  $("noteCard")
+    .classList.add("hidden");
+
+  $("confirmCard")
+    .classList.add("hidden");
+
+  $("brandHeader")
+    .classList.remove("hidden");
+
+  $("topActions")
+    .classList.remove("hidden");
+
+  $("reservationFixedBar")
+    .classList.remove("hidden");
+
+  if (state.visitorId) {
+    loadMenus();
+  } else {
+    loadVisitors();
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+function showReservationChangeControls() {
+  const original = state.changeOriginalReservation;
+
+  if (
+    !String(state.excludeReservationId || "").trim() ||
+    !original
+  ) {
+    return;
+  }
+
+  $("changeModeOriginal").textContent =
+    "変更前：" +
+    formatReservationDateTimeWithWeekday(
+      original.date,
+      original.start
+    ) +
+    "／" +
+    String(original.menu || state.menu || "予約");
+
+  $("changeModeNotice")
+    .classList.remove("hidden");
+
+  $("changeModeBackBtn")
+    .classList.remove("hidden");
+}
+function startReservationChange(reservationId) {
+  if (state.processing) {
+    return;
+  }
+
+  const reservation =
+    (state.currentReservations || []).find(
+      function(r) {
+        return (
+          String(r.reservationId) ===
+          String(reservationId)
+        );
+      }
+    );
+
+  if (!reservation) {
+    alert(
+      "変更対象の予約を確認できませんでした"
+    );
+    return;
+  }
+
+  clearReservationInputs(true);
+
+  state.changeOriginalReservation = {
+    date: String(reservation.date || ""),
+    start: String(reservation.start || ""),
+    end: String(reservation.end || ""),
+    menu: String(reservation.menu || "")
+  };
+
+  state.excludeReservationId =
+    String(reservation.reservationId);
+
+  state.visitorId =
+    String(reservation.visitorId || "");
+
+  state.menu =
+    String(reservation.menu || "");
+
+  showReservationChangeControls();
+
+  const visitorSelect = $("visitor");
+
+  const visitorOption =
+    Array.from(visitorSelect.options).find(
+      function(item) {
+        return (
+          String(item.value) ===
+          state.visitorId
+        );
+      }
+    );
+
+  if (!visitorOption) {
+    state.excludeReservationId = "";
+
+    alert(
+      "変更対象の受診者を確認できませんでした"
+    );
+    return;
+  }
+
+  visitorSelect.value =
+    visitorOption.value;
+
+  $("registrationCard")
+    .classList.add("hidden");
+
+  $("bookingArea")
+    .classList.remove("hidden");
+
+  $("reservationsCard")
+    .classList.add("hidden");
+
+  $("completeCard")
+    .classList.add("hidden");
+
+  $("confirmCard")
+    .classList.add("hidden");
+
+  $("menuCard")
+    .classList.add("hidden");
+
+  $("noteCard")
+    .classList.add("hidden");
+
+  $("reservationFixedBar")
+    .classList.add("hidden");
+
+  const visitorCard =
+    document.querySelector(
+      "#bookingArea > section:first-child"
+    );
+
+  if (visitorCard) {
+    visitorCard.classList.add("hidden");
+  }
+
+  $("menu").value = state.menu;
+
+  const loadingId = startLoading(
+    "変更可能な日時を確認しています"
+  );
+
+  gas(
+    "getStage5ReservationClassification",
+    [
+      state.visitorId,
+      state.menu,
+      reservation.date,
+      false,
+      state.excludeReservationId
+    ],
+    function(result) {
+      stopLoading(loadingId);
+
+      if (!result || !result.success) {
+        state.excludeReservationId = "";
+
+        alert(
+          result && result.message
+            ? result.message
+            : "予約内容を確認できませんでした"
+        );
+
+        showReservations();
+        return;
+      }
+
+      state.menuMinutes =
+        Number(result.minutes) || 30;
+
+      state.gridResults = {};
+      state.prefetching = {};
+      state.week = 0;
+
+      loadAvailabilityGrid();
+      showReservationChangeControls();
+
+      setTimeout(function() {
+        showReservationChangeControls();
+      }, 0);
+    },
+    function(error) {
+      stopLoading(loadingId);
+
+      state.excludeReservationId = "";
+
+      console.error(error);
+
+      alert(
+        "予約内容の確認に失敗しました"
+      );
+
+      showReservations();
+    }
+  );
+}
+function backToSlots() {
+  $("confirmCard")
+    .classList.add("hidden");
+
+  $("noteCard")
+    .classList.add("hidden");
+
+  $("slotCard")
+    .classList.remove("hidden");
+
+  if (state.slot) {
+    showBookingFooter(
+      state.date,
+      state.slot.start,
+      state.slot.end
+    );
+
+    $("footerReserveBtn").disabled =
+      false;
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+function cancelReservationChange() {
+  if (state.processing) {
+    return;
+  }
+
+  clearReservationInputs(true);
+  showReservations();
+}
+function showReservations() {
+  hideBookingFooter();
+  $("reservationFixedBar").classList.add("hidden");
+
+  $("visitorCard").classList.add("hidden");
+  $("menuCard").classList.add("hidden");
+  $("slotCard").classList.add("hidden");
+  $("noteCard").classList.add("hidden");
+  $("confirmCard").classList.add("hidden");
+  $("completeCard").classList.add("hidden");
+
+  /* v134：最新予約の取得前は古い一覧を表示しない */
+  $("reservationsCard").classList.add("hidden");
+  $("reservationList").innerHTML = "";
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+  const loadingId = startLoading(
+    "現在の予約を確認しています"
+  );
+  gas(    "getStage6CurrentReservations",
+[
+  state.registrantId,
+  state.visitorId
+],
+function(list) {
+  stopLoading(loadingId);
+  state.currentReservations = Array.isArray(list) ? list : [];
+
+  const box = $("reservationList");
+      if (!list || !list.length) {
+        box.innerHTML = "<p>現在の予約はありません</p>";
+      } else {
+box.innerHTML = list.map(function(r) {
+  const shortDate =
+    String(r.date || "")
+      .replace(/^\d{4}\//, "");
+
+  const safeReservationId =
+    String(r.reservationId || "")
+      .replace(/'/g, "\\'");
+
+  return (
+    '<div class="reservation-compact-row">' +
+      '<span class="reservation-compact-date">' +
+        escapeHtml(
+          shortDate + " " + r.start
+        ) +
+      '</span>' +
+      '<span class="reservation-compact-menu">' +
+        escapeHtml(r.menu) +
+      '</span>' +
+      '<button type="button" ' +
+        'class="reservation-change-button" ' +
+        'onclick="openReservationActions(\'' +
+          safeReservationId +
+        '\')">' +
+        '変更' +
+      '</button>' +
+    '</div>'
+  );
+}).join("");
+      }
+
+      $("reservationsCard").classList.remove("hidden");
+      $("reservationsCard").scrollIntoView({
+        behavior: "smooth"
+      });
+    }
+  );
+  }
+  let selectedReservationActionId = "";
+
+function openReservationActions(
+  reservationId
+) {
+  if (state.processing) {
+    return;
+  }
+
+  const reservation =
+    (state.currentReservations || [])
+      .find(function(item) {
+        return (
+          String(item.reservationId) ===
+          String(reservationId)
+        );
+      });
+
+  if (!reservation) {
+    alert(
+      "予約内容を確認できませんでした"
+    );
+    return;
+  }
+
+  selectedReservationActionId =
+    String(reservationId);
+
+  $("reservationDateChangeBtn").onclick =
+    function() {
+      const targetId =
+        selectedReservationActionId;
+
+      closeReservationActions();
+      startReservationChange(targetId);
+    };
+
+const cancelButton =
+  $("reservationCancelBtn");
+
+$("reservationDateChangeBtn")
+  .classList.remove("hidden");
+
+$("reservationCancelConfirmDetails")
+  .classList.add("hidden");
+
+$("reservationCancelTarget").textContent = "";
+
+cancelButton.textContent =
+  "予約をキャンセル";
+
+cancelButton.dataset.confirming = "0";
+cancelButton.classList.remove("danger");
+
+cancelButton.onclick = function() {
+  if (
+    cancelButton.dataset.confirming !==
+    "1"
+  ) {
+    cancelButton.dataset.confirming = "1";
+
+    cancelButton.textContent =
+      "キャンセルする";
+
+    cancelButton.classList.add("danger");
+
+    $("reservationDateChangeBtn")
+      .classList.add("hidden");
+
+    $("reservationCancelTarget").textContent =
+      formatReservationDateTimeWithWeekday(
+        reservation.date,
+        reservation.start
+      ) +
+      "／" +
+      String(reservation.menu || "予約");
+
+    $("reservationCancelConfirmDetails")
+      .classList.remove("hidden");
+
+    return;
+  }
+
+  const targetId =
+    selectedReservationActionId;
+
+  closeReservationActions();
+  cancelCurrentReservation(targetId);
+};
+  $("reservationActionOverlay")
+    .classList.remove("hidden");
+
+  document.body.style.overflow = "hidden";
+
+  setTimeout(function() {
+    $("reservationDateChangeBtn").focus();
+  }, 0);
+}
+
+function closeReservationActions() {
+  if (state.processing) {
+    return;
+  }
+
+  $("reservationActionOverlay")
+    .classList.add("hidden");
+
+  $("reservationDateChangeBtn")
+    .classList.remove("hidden");
+
+  $("reservationCancelConfirmDetails")
+    .classList.add("hidden");
+
+  $("reservationCancelBtn")
+    .classList.remove("danger");
+
+  selectedReservationActionId = "";
+  document.body.style.overflow = "";
+}
+function cancelCurrentReservation(
+  reservationId,
+  confirmDependentRevisits
+) {
+  if (state.processing) {
+    return;
+  }
+
+
+  state.processing = true;
+
+  const loadingId = startLoading(
+    "予約をキャンセルしています"
+  );
+
+  gas(
+    "cancelStage6Reservation",
+    [
+      state.registrantId,
+      reservationId,
+      confirmDependentRevisits === true
+    ],
+    function(result) {
+      if (
+        !result ||
+        !result.success
+      ) {
+        state.processing = false;
+        stopLoading(loadingId);
+
+        if (
+          result &&
+          result.requiresDependentCancellationConfirmation
+        ) {
+          showInitialCancellationWarning(
+            reservationId,
+            result
+          );
+          return;
+        }
+
+        alert(
+          result && result.message
+            ? result.message
+            : "キャンセルに失敗しました"
+        );
+        return;
+      }
+
+      gas(
+        "rebuildStage9Snapshot",
+        [
+          "WEB予約キャンセル後再構築"
+        ],
+        function(rebuildResult) {
+          state.processing = false;
+          stopLoading(loadingId);
+
+          showCancellationCompletion(
+            result,
+            false
+          );
+
+        },
+        function(rebuildError) {
+          state.processing = false;
+          stopLoading(loadingId);
+
+          console.error(
+            "キャンセル後の空き枠再構築に失敗",
+            rebuildError
+          );
+
+          showCancellationCompletion(
+            result,
+            true
+          );
+
+        }
+      );
+    },
+    function(error) {
+      state.processing = false;
+      stopLoading(loadingId);
+
+      console.error(error);
+
+      alert(
+        "キャンセル処理に失敗しました"
+      );
+    }
+  );
+}
+function showCancellationCompletion(
+  result,
+  snapshotFailed
+) {
+  const cancelled = Array.isArray(
+    result && result.cancelledReservations
+  )
+    ? result.cancelledReservations
+    : [];
+
+  let completionRows = "";
+
+  cancelled.forEach(function(item, index) {
+    completionRows += row(
+      String(
+        item.menuName ||
+        (
+          cancelled.length > 1
+            ? "キャンセル" + String(index + 1)
+            : "キャンセルした予約"
+        )
+      ),
+      formatReservationDateTimeWithWeekday(
+        item.date,
+        item.startTime
+      )
+    );
+  });
+
+  if (!completionRows) {
+    completionRows = row(
+      "予約ID",
+      String(
+        result && result.reservationId
+          ? result.reservationId
+          : ""
+      )
+    );
+  }
+
+  $("reservationsCard").classList.add("hidden");
+  $("reservationActionOverlay").classList.add("hidden");
+  $("reservationFixedBar").classList.add("hidden");
+  $("brandHeader").classList.remove("hidden");
+  $("topActions").classList.remove("hidden");
+
+  const completeTitle =
+    $("completeCard").querySelector("h2");
+
+  if (completeTitle) {
+    completeTitle.textContent =
+      "キャンセルが完了しました";
+  }
+
+  $("completeDetails").innerHTML =
+    "<p>以下の予約をキャンセルしました。</p>" +
+    completionRows +
+    (
+      snapshotFailed
+        ? '<div class="message error">空き枠情報の更新に失敗しました。予約のキャンセルは完了しています。</div>'
+        : ""
+    );
+
+  $("completeCard").classList.remove("hidden");
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+function closeReservations() {
+  if (state.processing) {
+    return;
+  }
+
+  /* v128：キャンセル・予約変更後の古いメニュー表示を残さない */
+  state.menu = "";
+  state.menuMeta = {};
+  state.slot = null;
+  state.week = 0;
+  state.gridResults = {};
+  state.prefetching = {};
+  $("menu").value = "";
+  $("menuOptions").innerHTML = "";
+  hideBookingFooter();
+
+  $("reservationsCard")
+    .classList.add("hidden");
+
+  $("visitorCard")
+    .classList.remove("hidden");
+
+  $("menuCard")
+    .classList.remove("hidden");
+
+  $("slotCard")
+    .classList.add("hidden");
+
+  $("noteCard")
+    .classList.add("hidden");
+
+  $("confirmCard")
+    .classList.add("hidden");
+
+  $("completeCard")
+    .classList.add("hidden");
+
+  $("brandHeader")
+    .classList.remove("hidden");
+
+  $("topActions")
+    .classList.remove("hidden");
+
+  $("reservationFixedBar")
+    .classList.remove("hidden");
+
+  if (state.visitorId) {
+    loadMenus();
+  } else {
+    loadVisitors();
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+function initializeApiBooking(){
+  liff.init({liffId:LIFF_ID})
+    .then(function(){
+      if(!liff.isLoggedIn()){
+        liff.login();
+        return;
+      }
+
+      apiIdToken=liff.getIDToken()||"";
+      if(!apiIdToken){
+        lineAuthError="ID_TOKEN_REQUIRED";
+        state.registrantId="";
+        boot();
+        return;
+      }
+
+      gas(
+        "authenticate",
+        [],
+        function(result){
+          state.lineUserId="LINE_AUTHENTICATED";
+          state.registrantId=result&&result.found
+            ? String(result.registrantId||"")
+            : "";
+
+          if(state.registrantId){
+            localStorage.setItem("okadaRegistrantId",state.registrantId);
+          }else{
+            localStorage.removeItem("okadaRegistrantId");
+          }
+
+          boot();
+        },
+        function(error){
+          console.error(error);
+          lineAuthError="LINE_AUTH_FAILED";
+          state.registrantId="";
+          localStorage.removeItem("okadaRegistrantId");
+          boot();
+        }
+      );
+    })
+    .catch(function(error){
+      console.error(error);
+      lineAuthError="LIFF_INIT_FAILED";
+      state.registrantId="";
+      boot();
+    });
+}
+
+$("note").addEventListener("input",e=>$("noteCount").textContent=e.target.value.length);
+initializeApiBooking();
+</script>
+</body>
+</html>
