@@ -968,7 +968,7 @@ html.ios-device .birth-selects select {
 </main>
 <script>
 const STAGE6_UI_VERSION="38";
-const STAGE9_UI_VERSION="58-LINE-BRIDGE";
+const STAGE9_UI_VERSION="59-LINE-BRIDGE-TIMEOUT";
 const LIFF_ID="2011019665-wbKBw2hK";
 const GAS_API_URL="https://script.google.com/macros/s/AKfycbySF8Ht4MqfTBtcepNc0WjJ7npPO5uaB8YNY37kyjQrYZSKgPXsFv5R96Cr8hZVH37keA/exec";
 const developmentMenuMode=false;
@@ -988,6 +988,9 @@ preferredMenuHistory:"",
 menuExpanded:false};
 const $ = id => document.getElementById(id);
   function gas(name,args,onSuccess,onFailure){
+    const controller=new AbortController();
+    const timeoutId=setTimeout(function(){controller.abort()},20000);
+
     fetch(GAS_API_URL,{
       method:"POST",
       headers:{"Content-Type":"text/plain;charset=utf-8"},
@@ -997,7 +1000,8 @@ const $ = id => document.getElementById(id);
         args:Array.isArray(args)?args:[],
         idToken:apiIdToken
       }),
-      redirect:"follow"
+      redirect:"follow",
+      signal:controller.signal
     })
       .then(function(response){
         if(!response.ok)throw new Error("HTTP "+response.status);
@@ -1010,7 +1014,13 @@ const $ = id => document.getElementById(id);
         if(typeof onSuccess==="function")onSuccess(envelope.data);
       })
       .catch(function(error){
+        if(error&&error.name==="AbortError"){
+          error=new Error("通信が20秒を超えたため中断しました");
+        }
         (onFailure||showFatal)(error);
+      })
+      .finally(function(){
+        clearTimeout(timeoutId);
       });
   }
   function showFatal(e){alert("処理に失敗しました。時間をおいて再度お試しください。");console.error(e)}
