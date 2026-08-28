@@ -968,7 +968,7 @@ html.ios-device .birth-selects select {
 </main>
 <script>
 const STAGE6_UI_VERSION="38";
-const STAGE9_UI_VERSION="61-AUTH-PREWARM-ALL-VISITORS";
+const STAGE9_UI_VERSION="60-PREWARM-CACHE";
 const LIFF_ID="2011019665-wbKBw2hK";
 const GAS_API_URL="https://script.google.com/macros/s/AKfycbySF8Ht4MqfTBtcepNc0WjJ7npPO5uaB8YNY37kyjQrYZSKgPXsFv5R96Cr8hZVH37keA/exec";
 const developmentMenuMode=false;
@@ -1342,14 +1342,7 @@ function openBooking() {
       $("slotCard").classList.add("hidden");
       $("noteCard").classList.add("hidden");
 
-      const firstOpenForWarm = state.dates.find(function(d) { return d.available; });
-      prewarmAllVisitors(
-        list,
-        firstOpenForWarm ? firstOpenForWarm.date : "",
-        function() {
-          loadMenus(false, loadingId);
-        }
-      );
+      loadMenus(false, loadingId);
     },
     function(error) {
       stopLoading(loadingId);
@@ -1370,7 +1363,7 @@ function openBooking() {
     if(button)button.textContent=details.open?"家族入力を閉じる":"家族を追加する";
   }
   function addFamily(){if(!$("familyBirth").value){setMessage("familyMessage","生年月日の年・月・日をすべて選択してください",true);return}const p={registrantId:state.registrantId,name:$("familyName").value,kana:$("familyKana").value,birthDate:$("familyBirth").value,gender:$("familyGender").value,relationship:"家族",isSelf:false};setMessage("familyMessage","登録中...");gas("registerOrFindVisitor",[p],r=>{if(!r.success){setMessage("familyMessage",r.message,true);return}setMessage("familyMessage","登録しました");loadVisitors()})}
-  function visitorChanged(){state.visitorId=$("visitor").value;state.menu="";state.menuMeta={};state.availableMenus=[];state.preferredMenuHistory="";state.menuExpanded=false;state.slot=null;state.week=0;state.gridResults={};state.prefetching={};hideBookingFooter();$("menu").innerHTML='<option value="">選択してください</option>';$("menuOptions").innerHTML="";$("menuCard").classList.add("hidden");$("slotCard").classList.add("hidden");$("noteCard").classList.add("hidden");loadMenus(true)}
+  function visitorChanged(){state.visitorId=$("visitor").value;state.menu="";state.menuMeta={};state.availableMenus=[];state.preferredMenuHistory="";state.menuExpanded=false;state.slot=null;state.week=0;state.gridResults={};state.prefetching={};state.availabilityCache={};state.availabilityWarming={};hideBookingFooter();$("menu").innerHTML='<option value="">選択してください</option>';$("menuOptions").innerHTML="";$("menuCard").classList.add("hidden");$("slotCard").classList.add("hidden");$("noteCard").classList.add("hidden");loadMenus(true)}
   function menuParts(name,minutes,meta){
     const supplied=meta||state.menuMeta[name];
     if(supplied&&(supplied.displayMenuName||supplied.priceText)){
@@ -1644,115 +1637,6 @@ function loadMenus(
     }
   );
 }
-
-function availabilityCacheKeyFor(visitorId, menuName, excludeReservationId) {
-  return [
-    String(visitorId || ""),
-    String(menuName || ""),
-    String(excludeReservationId || "")
-  ].join("|");
-}
-
-function prewarmVisitorInsurance(visitorId, firstOpenDate, done) {
-  visitorId = String(visitorId || "").trim();
-  if (!visitorId || !firstOpenDate) {
-    if (done) done();
-    return;
-  }
-
-  gas(
-    "getStage5MenusForVisitorWithPreference",
-    [visitorId, firstOpenDate, developmentMenuMode],
-    function(r) {
-      const menus = r && Array.isArray(r.menus) ? r.menus : [];
-      const insurance = menus.find(function(m) {
-        return String(m.medicalCategory || "") === "保険";
-      });
-
-      const menuName = insurance ? String(insurance.menuName || "") : "";
-      if (!menuName) {
-        if (done) done();
-        return;
-      }
-
-      const dates = businessDates().map(function(d) { return d.date; });
-      const key = availabilityCacheKeyFor(visitorId, menuName, "");
-      const bucket = state.availabilityCache[key] || (state.availabilityCache[key] = {});
-      const missing = dates.filter(function(date) { return !bucket[date]; });
-
-      if (!missing.length) {
-        if (done) done();
-        return;
-      }
-
-      let pending = 0;
-      let completed = false;
-      function finishOne() {
-        pending--;
-        if (pending <= 0 && !completed) {
-          completed = true;
-          if (done) done();
-        }
-      }
-
-      for (let i = 0; i < missing.length; i += 7) {
-        const chunk = missing.slice(i, i + 7);
-        pending++;
-        gas(
-          "getStage9AvailableSlotsBatch",
-          [state.registrantId, visitorId, chunk, menuName, ""],
-          function(result) {
-            chunk.forEach(function(date) {
-              bucket[date] =
-                result && result.success && result.results && result.results[date]
-                  ? result.results[date]
-                  : { success: false };
-            });
-            finishOne();
-          },
-          function() {
-            finishOne();
-          }
-        );
-      }
-    },
-    function() {
-      if (done) done();
-    }
-  );
-}
-
-function prewarmAllVisitors(visitors, firstOpenDate, done) {
-  const ids = (Array.isArray(visitors) ? visitors : [])
-    .map(function(v) { return String(v.visitorId || "").trim(); })
-    .filter(Boolean);
-
-  if (!ids.length) {
-    if (done) done();
-    return;
-  }
-
-  let remaining = ids.length;
-  let finished = false;
-  const safetyTimer = setTimeout(function() {
-    if (!finished) {
-      finished = true;
-      if (done) done();
-    }
-  }, 12000);
-
-  ids.forEach(function(visitorId) {
-    prewarmVisitorInsurance(visitorId, firstOpenDate, function() {
-      remaining--;
-      if (remaining <= 0 && !finished) {
-        finished = true;
-        clearTimeout(safetyTimer);
-        if (done) done();
-      }
-    });
-  });
-}
-
 function availabilityCacheKey(menuName) {
   return [
     String(state.visitorId || ""),
