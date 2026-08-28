@@ -1455,10 +1455,41 @@ function isFirstChoiceTransition(historyMenuName) {
 }
 
 function renderMenuOptions() {
+  const menuPriority = function(m) {
+    const name = String(m.menuName || "");
+
+    if (
+      name.indexOf("保険初診") === 0 ||
+      name.indexOf("保険再診") === 0
+    ) return 1;
+
+    if (name.indexOf("保険＋自費") === 0) return 2;
+
+    if (
+      name === "はじめてのからだ相談" ||
+      name === "からだ相談"
+    ) return 3;
+
+    if (name === "コンディショニング") return 4;
+
+    if (name === "スポーツケア") return 5;
+
+    if (name.indexOf("自賠責") === 0) return 6;
+
+    if (name.indexOf("労災") === 0) return 7;
+
+    return 99;
+  };
+
   const menus = Array.isArray(state.availableMenus)
-    ? state.availableMenus.filter(function(m) {
-        return String(m.menuName || "") !== "初回お試し";
-      })
+    ? state.availableMenus
+        .filter(function(m) {
+          return String(m.menuName || "") !== "初回お試し";
+        })
+        .slice()
+        .sort(function(a, b) {
+          return menuPriority(a) - menuPriority(b);
+        })
     : [];
 
   const preferredMenuName =
