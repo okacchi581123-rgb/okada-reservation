@@ -604,6 +604,39 @@ html.ios-device .birth-selects select {
   color: #fff !important;
   border-color: #687789 !important;
 }
+  /* メニュー表示 最終調整 */
+
+/* 通常メニュー：薄い水色 */
+#menuCard .menu-choice {
+  background: #edf7fd;
+  border: 2px solid #cbdde9;
+}
+
+/* 前回利用メニュー：位置は動かさず濃紺太枠 */
+#menuCard .menu-choice.previous-menu {
+  background: #edf7fd;
+  border: 4px solid #071f3d;
+}
+
+/* 自賠責・労災：控えめに表示 */
+#menuCard .menu-choice.special-insurance-menu {
+  background: #f7f8fa;
+  border: 2px solid #d9e0e6;
+}
+
+/* 選択したメニューは従来どおり濃紺 */
+#menuCard .menu-choice.selected,
+#menuCard .menu-choice.previous-menu.selected,
+#menuCard .menu-choice.special-insurance-menu.selected {
+  background: #071f3d !important;
+  color: #fff !important;
+  border-color: #071f3d !important;
+  box-shadow: inset 4px 0 #ffd400;
+}
+
+#menuCard .menu-choice.selected .menu-price {
+  color: #ffd400;
+}  
   </style>
 </head>
 <body>
@@ -1422,55 +1455,44 @@ function isFirstChoiceTransition(historyMenuName) {
 }
 
 function renderMenuOptions() {
-  let menus = Array.isArray(state.availableMenus)
-    ? state.availableMenus.slice()
-    : [];
-  const transition = isFirstChoiceTransition(
-    state.preferredMenuHistory
-  );
-
-  if (transition) {
-    menus = menus.filter(function(m) {
-      return m.menuName !== "初回お試し";
-    });
-  }
-
-  const preferredMenuName = transition
-    ? ""
-    : preferredMenuForDisplay(
-        menus,
-        state.preferredMenuHistory
-      );
-  const otherMenus = preferredMenuName
-    ? menus.filter(function(m) {
-        return m.menuName !== preferredMenuName;
+  const menus = Array.isArray(state.availableMenus)
+    ? state.availableMenus.filter(function(m) {
+        return String(m.menuName || "") !== "初回お試し";
       })
     : [];
-  const visibleMenus =
-    preferredMenuName && !state.menuExpanded
-      ? menus.filter(function(m) {
-          return m.menuName === preferredMenuName;
-        })
-      : menus;
 
-  let html = visibleMenus.map(menuChoiceHtml).join("");
+  const preferredMenuName =
+    preferredMenuForDisplay(
+      menus,
+      state.preferredMenuHistory
+    );
 
-  if (preferredMenuName && otherMenus.length) {
-    html +=
-      '<button type="button" class="menu-more-button" ' +
-      'onclick="toggleOtherMenus()">' +
-      (state.menuExpanded
-        ? "－ その他のメニューを閉じる"
-        : "＋ その他のメニューを表示") +
-      "</button>";
-  }
+  $("menuOptions").innerHTML =
+    menus.map(function(m) {
+      const html = menuChoiceHtml(m);
 
-  $("menuOptions").innerHTML = html;
-}
+      if (
+        preferredMenuName &&
+        String(m.menuName || "") === preferredMenuName
+      ) {
+        return html.replace(
+          'class="menu-choice"',
+          'class="menu-choice previous-menu"'
+        );
+      }
 
-function toggleOtherMenus() {
-  state.menuExpanded = !state.menuExpanded;
-  renderMenuOptions();
+      if (
+  String(m.menuName || "").indexOf("自賠責") === 0 ||
+  String(m.menuName || "").indexOf("労災") === 0
+) {
+        return html.replace(
+          'class="menu-choice"',
+          'class="menu-choice special-insurance-menu"'
+        );
+      }
+
+      return html;
+    }).join("");
 }
 
 function renderMenus(r) {
