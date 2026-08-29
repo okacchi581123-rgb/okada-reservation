@@ -17,7 +17,7 @@
     .primary{width:100%;background:linear-gradient(110deg,var(--blue),var(--cyan));color:#fff;margin-top:14px;box-shadow:0 7px 16px #0878c92c}.secondary{width:100%;background:var(--light);color:var(--blue);margin-top:10px}.danger{background:#fff0f0;color:var(--red)}
     .dates,.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.date-btn,.slot-btn{background:#fff;border:1px solid var(--border);padding:10px 5px;font-size:14px}.selected{background:var(--blue)!important;color:#fff!important;border-color:var(--blue)!important}
     .week-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.week-nav button{background:var(--light);color:var(--blue);font-size:14px}.week-nav button:disabled{opacity:.4}.grid-wrap{overflow-x:auto;overflow-y:visible;border:1px solid var(--border);border-radius:13px;background:#fff}.availability{border-collapse:separate;border-spacing:0;min-width:620px;width:100%;font-size:13px}.availability th,.availability td{border-right:1px solid #e5edf3;border-bottom:1px solid #e5edf3;text-align:center;padding:8px 4px;min-width:70px}.availability thead th{position:sticky;top:0;background:var(--navy);color:#fff;z-index:2}.availability thead small{display:block;margin-top:3px;color:#ffd28a;font-weight:800}.availability .time{position:sticky;left:0;background:#f7fbfe;color:var(--navy);font-weight:800;z-index:1}.availability thead .time{background:var(--navy);color:#fff;z-index:3}.availability button{padding:2px 9px;background:#e9f9f0;color:#0a9a52;font-size:20px;border-radius:999px}.availability button:hover{background:#0a9a52;color:#fff}.availability .closed{color:#c0c9d0;background:#f3f6f8}.availability .break-band{background:#fff4de;color:#9b5b00;font-weight:800;letter-spacing:.08em;padding:13px}.grid-legend{font-size:13px;margin:9px 0 0;color:var(--muted)}.back-link{background:#fff;color:var(--navy);border:1px solid var(--border);font-size:14px;margin-bottom:12px}
-    .disabled{opacity:.4;pointer-events:none}.message{margin-top:12px;padding:10px;border-radius:8px;background:var(--light)}.change-mode-notice{margin:0 0 12px;background:#fff0f0;color:#7a1b16;border-left:5px solid #d71920!important}.error{background:#fff0f0;color:var(--red)}
+    .disabled{opacity:.4;pointer-events:none}.message{margin-top:12px;padding:10px;border-radius:8px;background:var(--light)}.change-mode-notice{margin:0 0 12px;background:#fff0f0;color:#7a1b16;border-left:5px solid #d71920!important}.error{background:#ffe8ec;color:var(--red);border-left:6px solid var(--red)!important;font-weight:800}
     .student-refund-notice{margin:12px 0 2px;padding:11px 12px;background:#fff0f0;color:#8a241c;border:1px solid #f3c7c3;border-left:5px solid #d71920;border-radius:11px;font-size:clamp(12.5px,3.4vw,14px);font-weight:800;line-height:1.45;overflow-wrap:anywhere}
     details{margin-top:12px}summary{font-weight:700;cursor:pointer}.summary-row{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;gap:12px}.summary-row span:last-child{text-align:right}
     .loading{opacity:.6;pointer-events:none}.top-actions{display:grid;grid-template-columns:1fr;gap:9px;margin-bottom:15px}.top-actions button{font-size:13px;background:#fff;color:var(--navy);border:1px solid var(--border);box-shadow:0 4px 12px #1937500b}
@@ -2269,11 +2269,21 @@ $("noteCard")
 
         state.confirmCancelEarlierRevisits = false;
 
-        alert(
+        setMessage(
+          "confirmMessage",
           result && result.message
             ? result.message
-            : "予約処理に失敗しました"
+            : "予約処理に失敗しました",
+          true
         );
+
+        const confirmMessageEl = $("confirmMessage");
+        if (confirmMessageEl) {
+          confirmMessageEl.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+        }
 
         return;
       }
