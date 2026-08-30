@@ -24,6 +24,17 @@
     function fail(message){status.textContent=message;status.classList.add('error')}
     liff.init({liffId:LIFF_ID}).then(function(){
       if(!liff.isLoggedIn()){liff.login();return}
+
+      const decoded=liff.getDecodedIDToken();
+      const now=Math.floor(Date.now()/1000);
+      const expired=!decoded||!decoded.exp||decoded.exp<=now+60;
+
+      if(expired){
+        liff.logout();
+        liff.login();
+        return;
+      }
+
       const token=liff.getIDToken();
       if(!token){fail('LINE認証情報を取得できませんでした。画面を閉じて、もう一度開いてください。');return}
       document.getElementById('idToken').value=token;
