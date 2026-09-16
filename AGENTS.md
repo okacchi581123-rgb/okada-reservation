@@ -1,5 +1,13 @@
 # Repository Guidelines
 
+## 役割分担と共通MASTER
+
+- ChatGPTで決めた仕様・方針をGitHubへ反映する実行役はCodexとする。Codexはブランチ作成、実装、commit、push、PR作成までを担当する。
+- Claude Codeも同じGitHubリポジトリを参照し、必要なローカル作業・GAS・テストを担当する。
+- GitHubを両者の共通MASTERとし、作業開始時に最新の`origin/main`と対象ブランチを確認する。引き継ぎにはブランチ名・コミット・変更内容・テスト結果を明記する。
+- GAS本体は現在GitHub未管理のため、実際のGoogle側ソースを確認する。推測で再現せず、GitHub管理への移行は別途承認を得る。
+- このプロジェクトでは日本語で回答する。
+
 ## Project Structure & Module Organization
 
 - `index.html` is the production GitHub Pages entry point, connecting LINE LIFF authentication to a Google Apps Script (GAS) web app. HTML, CSS, and browser JavaScript are inline; there is no separate asset directory.
